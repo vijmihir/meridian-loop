@@ -1,0 +1,12 @@
+node_modules
+dist
+data/state.json
+.env
+data/uploads
+data/.session-secret
+.hallmark/shots
+.hallmark/before
+.hallmark/before.json
+.hallmark/before.txt
+.hallmark/compare.html
+.DS_Store

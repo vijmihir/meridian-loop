@@ -1,0 +1,32 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "shape": "Workbench",
+  "theme": "dose",
+  "axes": "light/grotesk-sans/chromatic-green",
+  "hero": "Stage",
+  "nav": "floating pill",
+  "footer": "index columns",
+  "imagery": "screenshots 4, photographs library 1",
+  "photos": [
+   "Cloth-roll.jpg"
+  ],
+  "entry": "hero",
+  "fingerprint": "stage-hero, tinted-bands, rows, split-photo-labels, rows-faq, ink-band",
+  "sections": [
+   "Hero",
+   "Bands",
+   "Rows",
+   "Split",
+   "Rows",
+   "Band",
+   "Footer"
+  ],
+  "signature": "a supplier certificate as a swing tag with its green stamp",
+  "waived": [],
+  "prompt": "AI sourcing platform matching sustainable fashion brands with verified Asian manufacturers, plus a marketplace for conscious shoppers",
+  "date": "2026-11-05"
+ }
+]
