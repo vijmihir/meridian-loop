@@ -43,7 +43,7 @@ async function* events(res) {
   }
 }
 
-export default function Chat({ initial }) {
+export default function Chat({ initial, role: startRole = 'brand' }) {
   const { meta } = useApp();
   const saved = load();
   const [messages, setMessages] = useState(saved?.messages || []);
@@ -145,7 +145,7 @@ export default function Chat({ initial }) {
     <div className={`chat ${empty ? 'is-empty' : 'has-side'}`}>
       <div className="chat-main">
       <div className="chat-scroll">
-        {empty ? <Start onSend={send} busy={busy} /> : null}
+        {empty ? <Start onSend={send} busy={busy} startRole={startRole} /> : null}
         {empty ? null : (
           <div className="thread" aria-live="polite" aria-busy={busy}>
             <div className="thread-bar">
@@ -185,10 +185,10 @@ export default function Chat({ initial }) {
 
 // ---------- the opening screen ----------
 
-function Start({ onSend, busy }) {
+function Start({ onSend, busy, startRole }) {
   const [makers, setMakers] = useState(null);
   const [brands, setBrands] = useState(null);
-  const [role, setRole] = useState('brand');
+  const [role, setRole] = useState(startRole);
   const [text, setText] = useState('');
   useEffect(() => { api.get('/manufacturers').then(setMakers).catch(() => setMakers([])); api.get('/brands').then(setBrands).catch(() => setBrands([])); }, []);
   const countries = makers ? new Set(makers.map((m) => m.country)).size : null;

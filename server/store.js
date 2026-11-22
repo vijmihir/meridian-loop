@@ -11,7 +11,8 @@ const seedMakers = [...manufacturers, ...moreManufacturers];
 const seedBrands = [...brands, ...moreBrands];
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const STATE_FILE = process.env.MERIDIAN_STATE || path.join(here, '..', 'data', 'state.json');
+// Serverless hosts (Vercel) only allow writes under /tmp, and each instance has its own copy.
+const STATE_FILE = process.env.MERIDIAN_STATE || (process.env.VERCEL ? '/tmp/meridian-state.json' : path.join(here, '..', 'data', 'state.json'));
 
 export const MAX_JOINED = 200;
 const empty = () => ({ manufacturers: [], brands: [] });

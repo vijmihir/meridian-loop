@@ -146,7 +146,7 @@ export const moreBrands = [
     [['Organic selvedge jeans', 'Straight leg, 14 oz organic selvedge, natural indigo welcome.', ['organic cotton', 'natural indigo'], 500, 'US$45 to 60', ['GOTS']]], 'Haruto Sato'),
   brand('velo-common', 'Velo Common', 'United Kingdom', 'London', 2019, 'Cycling apparel', 'Commuter and club cycling kit from recycled fabrics.', ['recycled materials', 'take-back'],
     [['Recycled cycling jerseys', 'Short-sleeve jersey with rear pockets, sublimated print.', ['recycled polyester'], 700, 'US$22 to 28', ['bluesign']]], 'Oliver Grant'),
-  brand('lumen-intimates', 'Lumen Intimates', 'Germany', 'Berlin', 2018, 'Organic underwear', 'Underwear in organic cotton with no plastic packaging.', ['organic', 'plastic-free'],
+  brand('brunnen-intimates', 'Brunnen Intimates', 'Germany', 'Berlin', 2018, 'Organic underwear', 'Underwear in organic cotton with no plastic packaging.', ['organic', 'plastic-free'],
     [['Organic cotton bras and briefs', 'Bralettes and briefs, sizes XS to XXL, plastic-free packaging.', ['organic cotton', 'TENCEL modal'], 1500, 'US$6 to 9', ['GOTS']]], 'Lena Fischer'),
   brand('dune-and-dye', 'Dune & Dye', 'United Arab Emirates', 'Dubai', 2021, 'Naturally dyed resort wear', 'Loose resort clothing dyed with plants, for heat and travel.', ['natural dyes', 'slow fashion'],
     [['Naturally dyed linen kaftans', 'One-size kaftans in linen or organic cotton, plant dyes.', ['linen', 'organic cotton', 'natural dyes'], 350, 'US$25 to 32']], 'Layla Haddad'),

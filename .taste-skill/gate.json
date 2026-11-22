@@ -1,0 +1,1056 @@
+{
+ "start": "2026-11-22T09:58:41.671Z",
+ "round": 1,
+ "idle": 0,
+ "errors": 0,
+ "status": "fail",
+ "history": [
+  {
+   "at": "2026-11-22T10:05:30.729Z",
+   "mode": "manual",
+   "status": "fail",
+   "fails": 23,
+   "round": 1,
+   "reused": false,
+   "stopHookActive": false
+  }
+ ],
+ "max": 3,
+ "marker": {
+  "page": "dist/index.html",
+  "url": null,
+  "root": "dist",
+  "kind": "software",
+  "category": "AI sourcing assistant for sustainable clothing",
+  "primary": "Ask the assistant",
+  "rounds": 3,
+  "start": "2026-11-22T09:58:41.671Z",
+  "by": "gate.mjs --start"
+ },
+ "manual": true,
+ "roundKey": "dec4c77616e84aab:da39a3ee",
+ "roundFree": false,
+ "idleFree": false,
+ "blockKey": null,
+ "fp": "dec4c77616e84aab",
+ "page": "dist/index.html",
+ "found": {
+  "fails": [
+   {
+    "check": "flush",
+    "where": "div.wrap > div.faq > div.faq__item:nth-of-type(6) > p \"With Sustainable India, which set out in\"",
+    "msg": "section#faq and footer#contact run together: 5px between their content, on one ground",
+    "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "flush"
+    ],
+    "wheres": [
+     "div.wrap > div.faq > div.faq__item:nth-of-type(6) > p \"With Sustainable India, which set out in\""
+    ]
+   },
+   {
+    "check": "sample-label",
+    "where": "div.wrap > div.faq > div.faq__item:nth-of-type(2) > p \"Only from company profiles on Meridian L\"",
+    "msg": "a note that the page's names or figures are examples (\"company and person in this demo is fictional\"): it reads as an apology and undercuts every claim",
+    "fix": "drop the \"sample\" tags and any note that names and figures are examples: take each from the brief, or remove the claim",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "sample-label"
+    ],
+    "wheres": [
+     "div.wrap > div.faq > div.faq__item:nth-of-type(2) > p \"Only from company profiles on Meridian L\""
+    ]
+   },
+   {
+    "check": "no-visual",
+    "where": "section#brands \"22 brands with open requests\"",
+    "msg": "no picture, effect or mock in this section; a feature section needs a visual",
+    "fix": "give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency",
+    "ids": [
+     "no-visual"
+    ],
+    "wheres": [
+     "section#brands \"22 brands with open requests\""
+    ]
+   },
+   {
+    "check": "text-only",
+    "where": "section#faq \"Questions from brands and manufacturers\"",
+    "msg": "the closing section is only text: no picture, icon, mock or effect in it",
+    "fix": "give the section a visual: a photograph that fits, the real icons, or a UI fragment on a ground",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency",
+    "ids": [
+     "text-only"
+    ],
+    "wheres": [
+     "section#faq \"Questions from brands and manufacturers\""
+    ]
+   },
+   {
+    "check": "ui-fit",
+    "where": "div.frame.span-7 > div.stage.stage--fade-b > div.fit > div.ui.ui-panel \"Brands / Open requests CG Common Ground \"",
+    "msg": "its \"Matching\" runs 142px past the fragment's own edge: the fragment is narrower than its content",
+    "fix": "give the fragment the width it needs (its meta.json size), or use a smaller fragment",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency",
+    "ids": [
+     "ui-fit"
+    ],
+    "wheres": [
+     "div.frame.span-7 > div.stage.stage--fade-b > div.fit > div.ui.ui-panel \"Brands / Open requests CG Common Ground \""
+    ]
+   },
+   {
+    "check": "button-styles",
+    "where": "(one screen)",
+    "msg": "3 button styles on one screen: soft, fill #232323 (\"Ask the assistant\"); soft, fill #eeeeee (\"Matches 6\", in a mock); round, fill #eeeeee (\"Compare the top three\", in a mock); the odd one out: \"Compare the top three\"",
+    "fix": "one primary and one secondary button: one shape, one height per size, one label size",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "button-styles"
+    ],
+    "wheres": [
+     "(one screen)"
+    ]
+   },
+   {
+    "check": "copy-headings",
+    "where": "div.wrap > div.grid > article.card.card--row:nth-of-type(2) > h3 \"Narrow the shortlist\"",
+    "msg": "\"Narrow the shortlist\" names no product, part, place or section (7 headings like it; at most one brand line per page) (and 6 more like it: \"Email the manufacturer\", \"What does it cost?\", \"Where do the answers com\", \"How are matches ranked?\", ...)",
+    "fix": "name the thing in every heading: the product, a part, the place or a section noun",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "copy-headings"
+    ],
+    "wheres": [
+     "div.wrap > div.grid > article.card.card--row:nth-of-type(2) > h3 \"Narrow the shortlist\""
+    ]
+   },
+   {
+    "check": "off-grid",
+    "where": "div.grid > div.span-5.stack-6 > div.btn-row > a.btn.btn--secondary \"Find brands for your factory\"",
+    "msg": "left edge at 89px, 9px off the page margin at 80px (39 elements, like h2#faq-h)",
+    "fix": "move it onto the page margin, or the column edge its section uses",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "off-grid"
+    ],
+    "wheres": [
+     "div.grid > div.span-5.stack-6 > div.btn-row > a.btn.btn--secondary \"Find brands for your factory\""
+    ]
+   },
+   {
+    "check": "text-contrast",
+    "where": "section#certificates > div.wrap > p.t-small.muted \"Certificates are listed as each company \"",
+    "msg": "body text in #686868 on #f3f3f3 reads 5.02:1 (needs 7:1)",
+    "fix": "body text in the ink at 7:1 or more; grey (4.5:1 or more) only for captions and labels",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency",
+    "ids": [
+     "text-contrast"
+    ],
+    "wheres": [
+     "section#certificates > div.wrap > p.t-small.muted \"Certificates are listed as each company \""
+    ]
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#certificates / section#brands",
+    "msg": "451px between these sections, +128% against the median 198px",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "section-gaps"
+    ],
+    "wheres": [
+     "section#certificates / section#brands"
+    ]
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#brands / section#faq",
+    "msg": "600px between these sections, +202% against the median 199px of gaps at a change of ground",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency",
+    "ids": [
+     "section-gaps"
+    ],
+    "wheres": [
+     "section#brands / section#faq"
+    ]
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#faq / footer#contact",
+    "msg": "5px between these sections, -97% against the median 198px",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "section-gaps"
+    ],
+    "wheres": [
+     "section#faq / footer#contact"
+    ]
+   },
+   {
+    "check": "section-height",
+    "where": "section#faq \"Questions from brands and manufacturers \"",
+    "msg": "the section's content does not fit it: its content is 134px taller than the section (scrollHeight 1034, clientHeight 900); its lowest content ends 1008px below its top, past 828px (the section less 72px of bottom padding); 5 parts lie outside the section's box (SR-2)",
+    "fix": "fit the content above the section's bottom padding (--padb), or make it two screens (.g2) in two groups",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "section-height"
+    ],
+    "wheres": [
+     "section#faq \"Questions from brands and manufacturers \"",
+     "section#faq > div.wrap > div.faq \"What does it cost?Nothing in this demo. \"",
+     "section#faq > div.wrap > div.faq > div.faq__item:nth-of-type(6) \"Where did Meridian Loop start?With Susta\""
+    ]
+   },
+   {
+    "check": "section-air",
+    "where": "section#brands \"22 brands with open requests For manufac\"",
+    "msg": "the content fills 34.5% of the section's height (311 of 900px): 55% or more (40% WARN) (SR-3)",
+    "fix": "fill the section to 55%: more content, a picture or a background layer, or merge it into the section above as its last block",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "section-air"
+    ],
+    "wheres": [
+     "section#brands \"22 brands with open requests For manufac\""
+    ]
+   },
+   {
+    "check": "one-section",
+    "where": "section#faq \"Questions from brands and manufacturers \"",
+    "msg": "the screen at scroll 5400px (stride 6) shows 62px of section 6 and the content of 2 sections, over 24px each beside section 7: a screen shows one section (another may peek 8px, 24px WARN) (SR-4)",
+    "fix": "make each section exactly one screen or two, so a screen shows one section and no neighbour peeks",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "one-section"
+    ],
+    "wheres": [
+     "section#faq \"Questions from brands and manufacturers \""
+    ]
+   },
+   {
+    "check": "split-pair",
+    "where": "section#brands > div.wrap > div.grid \"22 brands with open requests For manufac\"",
+    "msg": "the split's columns are off the page's one pair of lines: its right column starts at x 623, the first split's at 732 (SR-8)",
+    "fix": "start every split's right column on one shared line (wrap.left + k x (width + 24) / 12, k 5, 6 or 7; 6 on a place page) and end the left one 24px before it",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "split-pair"
+    ],
+    "wheres": [
+     "section#brands > div.wrap > div.grid \"22 brands with open requests For manufac\""
+    ]
+   },
+   {
+    "check": "no-visual",
+    "where": "section#makers \"45 manufacturers in 13 countries\"",
+    "msg": "no picture, effect or mock in this section; a feature section needs a visual",
+    "fix": "give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits",
+    "widths": [
+     390
+    ],
+    "from": "consistency",
+    "ids": [
+     "no-visual"
+    ],
+    "wheres": [
+     "section#makers \"45 manufacturers in 13 countries\""
+    ]
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#makers / section#certificates",
+    "msg": "278px between these sections, +85% against the median 150px of gaps at a change of ground",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     390
+    ],
+    "from": "consistency",
+    "ids": [
+     "section-gaps"
+    ],
+    "wheres": [
+     "section#makers / section#certificates"
+    ]
+   },
+   {
+    "check": "empty-area",
+    "where": "section#brands \"22 brands with open requests\"",
+    "msg": "56% of the section is empty: 58% beside content that covers under half the container, in its 700px of rows (WARN over 35%, FAIL over 50%)",
+    "fix": "fill the section: a picture or a second column beside the words, or more of its own content; the section stays one or two screens tall (T-height)",
+    "widths": [
+     390
+    ],
+    "from": "consistency",
+    "ids": [
+     "empty-area"
+    ],
+    "wheres": [
+     "section#brands \"22 brands with open requests\""
+    ]
+   },
+   {
+    "check": "off-viewport",
+    "where": "header.nav > div.wrap.nav__bar > button.nav__toggle",
+    "msg": "at 320px wide it runs 49px past the screen's right edge (cut there: the page clips what runs past it)",
+    "fix": "keep it inside the screen at this width: let it shrink, wrap or stack",
+    "widths": [
+     320
+    ],
+    "from": "consistency",
+    "ids": [
+     "off-viewport"
+    ],
+    "wheres": [
+     "header.nav > div.wrap.nav__bar > button.nav__toggle"
+    ]
+   },
+   {
+    "check": "sparse",
+    "where": "#brands section.section.ground-surface \"22 brands with open requests For\"",
+    "msg": "its content fills 34% of its screen; merge it or give it its visual (0.55 is the aim)",
+    "fix": "fill the section or make it a screen shorter",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "layout",
+    "ids": [
+     "sparse"
+    ],
+    "wheres": [
+     "#brands section.section.ground-surface \"22 brands with open requests For\""
+    ]
+   },
+   {
+    "check": "edge-right",
+    "where": "nav actions",
+    "msg": "end at x 380.9, the page's right line is 366",
+    "fix": "end it on the .wrap right line",
+    "widths": [
+     390
+    ],
+    "from": "layout",
+    "ids": [
+     "edge-right"
+    ],
+    "wheres": [
+     "nav actions"
+    ]
+   },
+   {
+    "check": "neighbour",
+    "where": "#how section.section \"Find a manufacturer in 3 steps. \"",
+    "msg": "framed, 26px of #makers section.section \"45 manufacturers in 13 countries\" shows",
+    "fix": "keep the next section's heading and picture out of this screen",
+    "widths": [
+     390
+    ],
+    "from": "layout",
+    "ids": [
+     "neighbour"
+    ],
+    "wheres": [
+     "#how section.section \"Find a manufacturer in 3 steps. \""
+    ]
+   }
+  ],
+  "warns": [
+   {
+    "check": "empty-visual",
+    "where": "div.wrap.grid > a.menu-card.span-4:nth-of-type(1) > div.panel > img.frame__img \"960px-Cloth-roll.jpg\"",
+    "msg": "the picture 960px-Cloth-roll.jpg was still loading 3 s after it came on screen (its frame showed empty meanwhile): make it smaller, or load it before it is reached",
+    "fix": "make the visual draw at every width: a picture that loads, an effect that renders, or its still fallback; never an empty frame",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "flush",
+    "where": "section#certificates > div.mo-io__stage > div.mo-io__cover",
+    "msg": "its first line sits 17px under the top edge of section#certificates, where the ground changes",
+    "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "cut-text",
+    "where": "div.ui-win__main > ul.ui-win__rows > li.ui-win__row:nth-of-type(8) > span.ui-win__sub \"Woven shirts, Karur\"",
+    "msg": "cut 5px at the bottom by the overflow of div.hero-text.hero__in > div.hero__stage > div.ui.app > div.app__pane.app__pane--list: a fragment run out through its panel's edge",
+    "fix": "give the text room: no overflow clipping a line, no line past its box",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "dark-ground",
+    "where": "div.wrap > div.hero-text.hero__in > div.hero__stage > div.ui.app",
+    "msg": "the ground behind the UI is nearly as light as the UI on it (white on near-white)",
+    "fix": "light the ground behind the UI (a daylight data-fx-palette): at least 3:1 against the card",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "col-edge",
+    "where": "div.hero-text.hero__in > div.hero__stage > div.ui.app > div.app__pane.app__pane--open \"Meridian Loop assistant Online Brief fro\"",
+    "msg": "the second column starts at 3 places: 614px (section.hero.hero--product), 623px (section#brands), 732px (section#makers, section#certificates)",
+    "fix": "start the second column of every split on the same one or two grid columns",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "text-contrast",
+    "where": "div.ui-win__main > ul.ui-win__rows > li.ui-win__row:nth-of-type(2) > span.ui-win__st \"Checking\"",
+    "msg": "14 lines of text in drawn mocks read under 4.5:1 (4 colour pairs), the worst \"Checking\" in #7fc09b on #f4fff8 at 2.07:1",
+    "fix": "lift the mocks' muted text (labels, meta, initials) to 4.5:1 on their own panel, or set it larger",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#makers / section#certificates",
+    "msg": "uneven space at the edge of a band: 161px outside its edge, 17px inside it (the space on either side of a change of ground reads as one gap only when the two match)",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#brands / section#faq",
+    "msg": "uneven space at the edge of a band: 113px outside its edge, 487px inside it (the space on either side of a change of ground reads as one gap only when the two match)",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "photo-credit",
+    "where": "div.wrap > div.grid > div.frame.frame--photo > img.frame__img",
+    "msg": "2 library sources (wikimedia): the page credits wikimedia, 1280px-Drying_the_cotton_silk_fabric.jpg; confirm each shows the client's own product, place or people",
+    "fix": "confirm the library photograph shows the client's own product, place or people; otherwise replace it",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-labels",
+    "where": "header.nav > div.wrap.nav__bar > a.nav__logo \"Meridian Loop\"",
+    "msg": "\"Meridian Loop\" opens a section headed \"Sourcing assistant for clothing brands\"",
+    "fix": "name each nav link after the heading of the section it opens",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-labels",
+    "where": "div.wrap.nav__bar > nav.nav__links > div.nav__item:nth-of-type(1) > a.nav__link \"Tools\"",
+    "msg": "\"Tools\" opens a section headed \"Find a manufacturer in 3 steps. Every answer names\"",
+    "fix": "name each nav link after the heading of the section it opens",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-labels",
+    "where": "div.wrap.nav__bar > nav.nav__links > div.nav__item:nth-of-type(3) > a.nav__link \"Makers\"",
+    "msg": "\"Makers\" opens a section headed \"45 manufacturers in 13 countries\"",
+    "fix": "name each nav link after the heading of the section it opens",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "label-centre",
+    "where": "header.nav > div.wrap.nav__bar > div.nav__actions > a.btn.btn--primary \"Ask the assistant\"",
+    "msg": "its label sits 18px off-centre (25px of room at the left, 43px at the right)",
+    "fix": "centre the label in its button, or fill the empty side with an icon",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "fade-cut",
+    "where": "div.ui-win__main > ul.ui-win__rows > li.ui-win__row:nth-of-type(8) > span.ui-win__st \"Meets all\"",
+    "msg": "a line of div.ui.ui-panel fades out under its edge (\"Meets all\"): drawn at a fraction of #848484 on #ffffff, half-erased",
+    "fix": "fit the mock's rows inside its panel (fewer rows, a taller panel), or end the fade below the last whole row: no row half-erased",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "fade-cut",
+    "where": "div.ui-msg.ui-msg--bot > span.ui-msg__col > span.ui-chat__answer > span.ui-chat__w:nth-of-type(5) \"from\"",
+    "msg": "5 lines of div.ui.ui-panel fade out under its edge (\"from\", \"800,\", \"50\"): drawn at a fraction of #494949 on #ffffff, half-erased",
+    "fix": "fit the mock's rows inside its panel (fewer rows, a taller panel), or end the fade below the last whole row: no row half-erased",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "copy-length",
+    "where": "section#faq \"Questions from brands and manufacturers\"",
+    "msg": "2 sections over 90 words a screen outside the UI mocks (\"Questions from brands an\" 147, \"Certificates with issuer\" 112); 73 words a screen across the page (439 words in 6 screens): a tech page says it in about 80 or fewer",
+    "fix": "cut every section to its heading, one line and the product UI: the UI says the rest; no second paragraph, no list of feature sentences",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-current",
+    "where": "header.nav",
+    "msg": "the nav stays on screen with 5 links to the page's sections, but never marks the one you are in (no link changes as the page scrolls)",
+    "fix": "mark the link of the section on screen (a colour, a weight or a line under it) as the visitor scrolls",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "loop-cycle",
+    "where": "article.card.card--row:nth-of-type(1) > div.panel > div.stage.stage--fade-b > div.at-rise.fit",
+    "msg": "a fragment loop of 0.9 s: under the 2.5-4 s cycle, it reads as blinking",
+    "fix": "set the loop's cycle to 2.5-4 s (--m-cycle) with every keyframe on it, repeating",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "action-repeat",
+    "where": "header.nav > div.wrap.nav__bar > div.nav__actions > a.btn.btn--primary \"ask the assistant\"",
+    "msg": "\"ask the assistant\" shows 2 times on the first screen at 1440px (nav, hero): the nav's button and the hero's; nothing else on the screen may repeat it",
+    "fix": "show the action once a screen besides the nav's button: the hero's, the close's or the phone bar's, never all at once",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-air",
+    "where": "section#brands / section#faq",
+    "msg": "589px of air between the content of these two sections: 128-480px (64-600px WARN) (SR-3)",
+    "fix": "keep 128-480px of air between the content of neighbouring sections (112-420px on a phone): the sections' padding (--padt, --padb)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "cut-text",
+    "where": "div.ui.ui-panel > ul.ui-checks__list > li.ui-check:nth-of-type(5) > span.ui-check__label \"Within 40 days\"",
+    "msg": "cut 6px at the bottom by the overflow of div.wrap > div.grid > article.card.card--row:nth-of-type(2) > div.panel: a fragment run out through its panel's edge",
+    "fix": "give the text room: no overflow clipping a line, no line past its box",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "cta",
+    "where": "section#how \"Find a manufacturer in 3 steps. Every an\"",
+    "msg": "a section over 1.5 screens long with no link or button in it",
+    "fix": "add the action: a button in the hero, one on every priced item, one in the closing section",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "text-contrast",
+    "where": "div.app__pane.app__pane--open > div.ui.ui-panel > div.ui-chat__input > span.ui-chat__ph \"Ask a follow-up\"",
+    "msg": "4 lines of text in drawn mocks read under 4.5:1 (2 colour pairs), the worst \"Ask a follow-up\" in #848484 on #f6f6f6 at 3.46:1",
+    "fix": "lift the mocks' muted text (labels, meta, initials) to 4.5:1 on their own panel, or set it larger",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "fade-cut",
+    "where": "div.app__pane.app__pane--open > div.ui.ui-panel > div.ui-chat__input > span.ui-chat__ph \"Ask a follow-up\"",
+    "msg": "a line of div.ui.ui-panel fades out under its edge (\"Ask a follow-up\"): drawn at a fraction of #848484 on #f6f6f6, half-erased",
+    "fix": "fit the mock's rows inside its panel (fewer rows, a taller panel), or end the fade below the last whole row: no row half-erased",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "copy-stat-strip",
+    "msg": "stat strip x1",
+    "fix": "a strip only of figures the brief gives (a price, hours, a count); otherwise put each number in the sentence it proves, or leave it out (references/copy-tells.md)",
+    "widths": [],
+    "from": "copy",
+    "where": "copy x1: \"12 / 6 / 6 / 5 / 10\"",
+    "exact": false
+   }
+  ],
+  "crashed": [],
+  "seconds": {
+   "consistency": 104,
+   "layout": 5
+  }
+ },
+ "open": [
+  {
+   "check": "flush",
+   "where": "div.wrap > div.faq > div.faq__item:nth-of-type(6) > p \"With Sustainable India, which set out in\"",
+   "msg": "section#faq and footer#contact run together: 5px between their content, on one ground",
+   "fix": "give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "flush"
+   ],
+   "wheres": [
+    "div.wrap > div.faq > div.faq__item:nth-of-type(6) > p \"With Sustainable India, which set out in\""
+   ]
+  },
+  {
+   "check": "sample-label",
+   "where": "div.wrap > div.faq > div.faq__item:nth-of-type(2) > p \"Only from company profiles on Meridian L\"",
+   "msg": "a note that the page's names or figures are examples (\"company and person in this demo is fictional\"): it reads as an apology and undercuts every claim",
+   "fix": "drop the \"sample\" tags and any note that names and figures are examples: take each from the brief, or remove the claim",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "sample-label"
+   ],
+   "wheres": [
+    "div.wrap > div.faq > div.faq__item:nth-of-type(2) > p \"Only from company profiles on Meridian L\""
+   ]
+  },
+  {
+   "check": "no-visual",
+   "where": "section#brands \"22 brands with open requests\"",
+   "msg": "no picture, effect or mock in this section; a feature section needs a visual",
+   "fix": "give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits",
+   "widths": [
+    1440,
+    390
+   ],
+   "from": "consistency",
+   "ids": [
+    "no-visual"
+   ],
+   "wheres": [
+    "section#brands \"22 brands with open requests\""
+   ]
+  },
+  {
+   "check": "text-only",
+   "where": "section#faq \"Questions from brands and manufacturers\"",
+   "msg": "the closing section is only text: no picture, icon, mock or effect in it",
+   "fix": "give the section a visual: a photograph that fits, the real icons, or a UI fragment on a ground",
+   "widths": [
+    1440,
+    390
+   ],
+   "from": "consistency",
+   "ids": [
+    "text-only"
+   ],
+   "wheres": [
+    "section#faq \"Questions from brands and manufacturers\""
+   ]
+  },
+  {
+   "check": "ui-fit",
+   "where": "div.frame.span-7 > div.stage.stage--fade-b > div.fit > div.ui.ui-panel \"Brands / Open requests CG Common Ground \"",
+   "msg": "its \"Matching\" runs 142px past the fragment's own edge: the fragment is narrower than its content",
+   "fix": "give the fragment the width it needs (its meta.json size), or use a smaller fragment",
+   "widths": [
+    1440,
+    390
+   ],
+   "from": "consistency",
+   "ids": [
+    "ui-fit"
+   ],
+   "wheres": [
+    "div.frame.span-7 > div.stage.stage--fade-b > div.fit > div.ui.ui-panel \"Brands / Open requests CG Common Ground \""
+   ]
+  },
+  {
+   "check": "button-styles",
+   "where": "(one screen)",
+   "msg": "3 button styles on one screen: soft, fill #232323 (\"Ask the assistant\"); soft, fill #eeeeee (\"Matches 6\", in a mock); round, fill #eeeeee (\"Compare the top three\", in a mock); the odd one out: \"Compare the top three\"",
+   "fix": "one primary and one secondary button: one shape, one height per size, one label size",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "button-styles"
+   ],
+   "wheres": [
+    "(one screen)"
+   ]
+  },
+  {
+   "check": "copy-headings",
+   "where": "div.wrap > div.grid > article.card.card--row:nth-of-type(2) > h3 \"Narrow the shortlist\"",
+   "msg": "\"Narrow the shortlist\" names no product, part, place or section (7 headings like it; at most one brand line per page) (and 6 more like it: \"Email the manufacturer\", \"What does it cost?\", \"Where do the answers com\", \"How are matches ranked?\", ...)",
+   "fix": "name the thing in every heading: the product, a part, the place or a section noun",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "copy-headings"
+   ],
+   "wheres": [
+    "div.wrap > div.grid > article.card.card--row:nth-of-type(2) > h3 \"Narrow the shortlist\""
+   ]
+  },
+  {
+   "check": "off-grid",
+   "where": "div.grid > div.span-5.stack-6 > div.btn-row > a.btn.btn--secondary \"Find brands for your factory\"",
+   "msg": "left edge at 89px, 9px off the page margin at 80px (39 elements, like h2#faq-h)",
+   "fix": "move it onto the page margin, or the column edge its section uses",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "off-grid"
+   ],
+   "wheres": [
+    "div.grid > div.span-5.stack-6 > div.btn-row > a.btn.btn--secondary \"Find brands for your factory\""
+   ]
+  },
+  {
+   "check": "text-contrast",
+   "where": "section#certificates > div.wrap > p.t-small.muted \"Certificates are listed as each company \"",
+   "msg": "body text in #686868 on #f3f3f3 reads 5.02:1 (needs 7:1)",
+   "fix": "body text in the ink at 7:1 or more; grey (4.5:1 or more) only for captions and labels",
+   "widths": [
+    1440,
+    390
+   ],
+   "from": "consistency",
+   "ids": [
+    "text-contrast"
+   ],
+   "wheres": [
+    "section#certificates > div.wrap > p.t-small.muted \"Certificates are listed as each company \""
+   ]
+  },
+  {
+   "check": "section-gaps",
+   "where": "section#certificates / section#brands",
+   "msg": "451px between these sections, +128% against the median 198px",
+   "fix": "use one gap between sections (all within 25% of each other)",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "section-gaps"
+   ],
+   "wheres": [
+    "section#certificates / section#brands"
+   ]
+  },
+  {
+   "check": "section-gaps",
+   "where": "section#brands / section#faq",
+   "msg": "600px between these sections, +202% against the median 199px of gaps at a change of ground",
+   "fix": "use one gap between sections (all within 25% of each other)",
+   "widths": [
+    1440,
+    390
+   ],
+   "from": "consistency",
+   "ids": [
+    "section-gaps"
+   ],
+   "wheres": [
+    "section#brands / section#faq"
+   ]
+  },
+  {
+   "check": "section-gaps",
+   "where": "section#faq / footer#contact",
+   "msg": "5px between these sections, -97% against the median 198px",
+   "fix": "use one gap between sections (all within 25% of each other)",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "section-gaps"
+   ],
+   "wheres": [
+    "section#faq / footer#contact"
+   ]
+  },
+  {
+   "check": "section-height",
+   "where": "section#faq \"Questions from brands and manufacturers \"",
+   "msg": "the section's content does not fit it: its content is 134px taller than the section (scrollHeight 1034, clientHeight 900); its lowest content ends 1008px below its top, past 828px (the section less 72px of bottom padding); 5 parts lie outside the section's box (SR-2)",
+   "fix": "fit the content above the section's bottom padding (--padb), or make it two screens (.g2) in two groups",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "section-height"
+   ],
+   "wheres": [
+    "section#faq \"Questions from brands and manufacturers \"",
+    "section#faq > div.wrap > div.faq \"What does it cost?Nothing in this demo. \"",
+    "section#faq > div.wrap > div.faq > div.faq__item:nth-of-type(6) \"Where did Meridian Loop start?With Susta\""
+   ]
+  },
+  {
+   "check": "section-air",
+   "where": "section#brands \"22 brands with open requests For manufac\"",
+   "msg": "the content fills 34.5% of the section's height (311 of 900px): 55% or more (40% WARN) (SR-3)",
+   "fix": "fill the section to 55%: more content, a picture or a background layer, or merge it into the section above as its last block",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "section-air"
+   ],
+   "wheres": [
+    "section#brands \"22 brands with open requests For manufac\""
+   ]
+  },
+  {
+   "check": "one-section",
+   "where": "section#faq \"Questions from brands and manufacturers \"",
+   "msg": "the screen at scroll 5400px (stride 6) shows 62px of section 6 and the content of 2 sections, over 24px each beside section 7: a screen shows one section (another may peek 8px, 24px WARN) (SR-4)",
+   "fix": "make each section exactly one screen or two, so a screen shows one section and no neighbour peeks",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "one-section"
+   ],
+   "wheres": [
+    "section#faq \"Questions from brands and manufacturers \""
+   ]
+  },
+  {
+   "check": "split-pair",
+   "where": "section#brands > div.wrap > div.grid \"22 brands with open requests For manufac\"",
+   "msg": "the split's columns are off the page's one pair of lines: its right column starts at x 623, the first split's at 732 (SR-8)",
+   "fix": "start every split's right column on one shared line (wrap.left + k x (width + 24) / 12, k 5, 6 or 7; 6 on a place page) and end the left one 24px before it",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "split-pair"
+   ],
+   "wheres": [
+    "section#brands > div.wrap > div.grid \"22 brands with open requests For manufac\""
+   ]
+  },
+  {
+   "check": "no-visual",
+   "where": "section#makers \"45 manufacturers in 13 countries\"",
+   "msg": "no picture, effect or mock in this section; a feature section needs a visual",
+   "fix": "give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits",
+   "widths": [
+    390
+   ],
+   "from": "consistency",
+   "ids": [
+    "no-visual"
+   ],
+   "wheres": [
+    "section#makers \"45 manufacturers in 13 countries\""
+   ]
+  },
+  {
+   "check": "section-gaps",
+   "where": "section#makers / section#certificates",
+   "msg": "278px between these sections, +85% against the median 150px of gaps at a change of ground",
+   "fix": "use one gap between sections (all within 25% of each other)",
+   "widths": [
+    390
+   ],
+   "from": "consistency",
+   "ids": [
+    "section-gaps"
+   ],
+   "wheres": [
+    "section#makers / section#certificates"
+   ]
+  },
+  {
+   "check": "empty-area",
+   "where": "section#brands \"22 brands with open requests\"",
+   "msg": "56% of the section is empty: 58% beside content that covers under half the container, in its 700px of rows (WARN over 35%, FAIL over 50%)",
+   "fix": "fill the section: a picture or a second column beside the words, or more of its own content; the section stays one or two screens tall (T-height)",
+   "widths": [
+    390
+   ],
+   "from": "consistency",
+   "ids": [
+    "empty-area"
+   ],
+   "wheres": [
+    "section#brands \"22 brands with open requests\""
+   ]
+  },
+  {
+   "check": "off-viewport",
+   "where": "header.nav > div.wrap.nav__bar > button.nav__toggle",
+   "msg": "at 320px wide it runs 49px past the screen's right edge (cut there: the page clips what runs past it)",
+   "fix": "keep it inside the screen at this width: let it shrink, wrap or stack",
+   "widths": [
+    320
+   ],
+   "from": "consistency",
+   "ids": [
+    "off-viewport"
+   ],
+   "wheres": [
+    "header.nav > div.wrap.nav__bar > button.nav__toggle"
+   ]
+  },
+  {
+   "check": "sparse",
+   "where": "#brands section.section.ground-surface \"22 brands with open requests For\"",
+   "msg": "its content fills 34% of its screen; merge it or give it its visual (0.55 is the aim)",
+   "fix": "fill the section or make it a screen shorter",
+   "widths": [
+    1440,
+    390
+   ],
+   "from": "layout",
+   "ids": [
+    "sparse"
+   ],
+   "wheres": [
+    "#brands section.section.ground-surface \"22 brands with open requests For\""
+   ]
+  },
+  {
+   "check": "edge-right",
+   "where": "nav actions",
+   "msg": "end at x 380.9, the page's right line is 366",
+   "fix": "end it on the .wrap right line",
+   "widths": [
+    390
+   ],
+   "from": "layout",
+   "ids": [
+    "edge-right"
+   ],
+   "wheres": [
+    "nav actions"
+   ]
+  },
+  {
+   "check": "neighbour",
+   "where": "#how section.section \"Find a manufacturer in 3 steps. \"",
+   "msg": "framed, 26px of #makers section.section \"45 manufacturers in 13 countries\" shows",
+   "fix": "keep the next section's heading and picture out of this screen",
+   "widths": [
+    390
+   ],
+   "from": "layout",
+   "ids": [
+    "neighbour"
+   ],
+   "wheres": [
+    "#how section.section \"Find a manufacturer in 3 steps. \""
+   ]
+  }
+ ],
+ "waived": [],
+ "warnCount": 25,
+ "at": "2026-11-22T10:05:30.730Z"
+}

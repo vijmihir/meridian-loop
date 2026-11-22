@@ -22,6 +22,8 @@ function useRoute() {
 
 export default function App() {
   const { parts, params } = useRoute();
+  // Links from the landing page arrive as app.html?q=... or ?role=maker.
+  const search = new URLSearchParams(window.location.search);
   const [meta, setMeta] = useState(null);
   const [toast, setToast] = useState('');
   useEffect(() => { api.get('/meta').then(setMeta).catch(() => {}); }, []);
@@ -45,7 +47,7 @@ export default function App() {
     <Ctx.Provider value={{ meta, notify, refreshMeta: () => api.get('/meta').then(setMeta) }}>
       <header className="header">
         <div className="bar">
-          <a className="brand" href="#/" aria-label="Meridian Loop, the assistant">Meridian Loop</a>
+          <a className="brand" href="/" aria-label="Meridian Loop home">Meridian Loop</a>
           <nav className="nav" aria-label="Main">
             <a href="#/" aria-current={here('chat')}>Assistant</a>
             <a href="#/directory" aria-current={here('directory')}>Directory</a>
@@ -54,7 +56,7 @@ export default function App() {
         </div>
       </header>
       <main className={onChat ? 'main-chat' : 'main-page'}>
-        {onChat && <Chat initial={params.get('q') || ''} />}
+        {onChat && <Chat initial={params.get('q') || search.get('q') || ''} role={search.get('role') === 'maker' ? 'maker' : 'brand'} />}
         {page === 'm' && <Profile kind="maker" id={id} />}
         {page === 'b' && <Profile kind="brand" id={id} />}
         {page === 'directory' && <Directory tab={params.get('tab') === 'brands' ? 'brands' : 'makers'} />}
