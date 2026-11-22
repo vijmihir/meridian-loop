@@ -15,4 +15,4 @@ services:
         value: "22"
       - key: DEMO_MODE
         value: "1"
-      # Optional: add ANTHROPIC_API_KEY in the Render dashboard for Claude-written answers.
+      # Add in the Render dashboard: ANTHROPIC_API_KEY (Claude answers), DATABASE_URL (Postgres storage), MERIDIAN_SECRET (session signing).

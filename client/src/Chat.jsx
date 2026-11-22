@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useApp } from './App.jsx';
-import { api } from './api.js';
-import { HERO, materialPhoto } from './photos.js';
+import { api, sessionId, track, fmtMoney } from './api.js';
+import { materialPhoto } from './photos.js';
 import MapDialog from './MapDialog.jsx';
 
 const STORE = 'meridian-chat-v1';
@@ -50,7 +50,7 @@ export default function Chat({ initial, role: startRole = 'brand' }) {
   const [convo, setConvo] = useState(saved?.convo || {});
   const [shortlist, setShortlist] = useState(saved?.shortlist || []);
   const isSaved = (id) => shortlist.some((x) => x.id === id);
-  const toggleSave = (c) => setShortlist((l) => (l.some((x) => x.id === c.id) ? l.filter((x) => x.id !== c.id) : [...l, c]));
+  const toggleSave = (c) => setShortlist((l) => { const has = l.some((x) => x.id === c.id); if (!has) track('shortlist', c.id); return has ? l.filter((x) => x.id !== c.id) : [...l, c]; });
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const inputRef = useRef(null);
@@ -88,7 +88,7 @@ export default function Chat({ initial, role: startRole = 'brand' }) {
       for (let attempt = 0; ; attempt++) {
         touch();
         try {
-          res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, state }), signal: ctrl.signal });
+          res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, state, session: sessionId() }), signal: ctrl.signal });
           if ([502, 503, 504].includes(res.status) && attempt < 2) { await new Promise((r) => setTimeout(r, 2000)); continue; }
           break;
         } catch (err) {
@@ -201,8 +201,7 @@ function Start({ onSend, busy, startRole }) {
 
   return (
     <div className="start">
-      <section className="start-hero" aria-labelledby="start-head">
-        <img className="start-bg" src={HERO.src} srcSet={HERO.srcSet} sizes="100vw" alt="" width={HERO.w} height={HERO.h} style={{ objectPosition: HERO.position }} />
+      <section className="start-top" aria-labelledby="start-head">
         <div className="start-inner">
           <h1 id="start-head">{copy.head}</h1>
           <p className="start-lead">{copy.lead}</p>
@@ -219,7 +218,6 @@ function Start({ onSend, busy, startRole }) {
             {copy.examples.map((e) => <button key={e} type="button" onClick={() => ask(e)}>{e}</button>)}
           </div>
         </div>
-        <p className="start-credit">{HERO.caption} Photo: <a href={HERO.page} rel="noopener">{HERO.credit}</a>, {HERO.license}.</p>
       </section>
 
       <div className="start-below">
@@ -301,6 +299,7 @@ function Side({ brief, shortlist, onRemove, onSend, busy, compact }) {
             <div><dt>You are</dt><dd>{brief.side === 'maker' ? 'A manufacturer' : brief.side === 'brand' ? 'A brand' : <span className="unset">Not said yet</span>}</dd></div>
             {rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
           </dl>
+          {brief.topic && <SaveSearch query={[brief.topic, ...(brief.countries || []).map((c) => `in ${c}`), ...(brief.certifications || [])].join(', ')} />}
           {brief.found != null && <p className="brief-note">{brief.found === 1 ? 'One match meets' : `${brief.found} matches meet`} everything above. Tell the assistant to change any of it.</p>}
         </section>
         <section aria-labelledby={`short-head${compact ? '-c' : ''}`}>
@@ -316,7 +315,10 @@ function Side({ brief, shortlist, onRemove, onSend, busy, compact }) {
               ))}
             </ul>
           )}
-          {makers.length >= 2 && <button type="button" className="btn btn-quiet" disabled={busy} onClick={() => onSend(`Compare ${makers.slice(0, 4).map((x) => x.name).join(' and ')}`)}>Compare shortlist</button>}
+          <div className="btn-row side-actions">
+            {makers.length >= 1 && <a className="btn" href={`#/quotes/new?makers=${makers.slice(0, 8).map((x) => x.id).join(',')}&title=${encodeURIComponent(brief.topic || '')}&qty=${brief.quantity || brief.maxMoq || ''}&certs=${encodeURIComponent((brief.certifications || []).join(', '))}`}>Request quotes from {makers.length === 1 ? 'it' : `all ${Math.min(makers.length, 8)}`}</a>}
+            {makers.length >= 2 && <button type="button" className="btn btn-quiet" disabled={busy} onClick={() => onSend(`Compare ${makers.slice(0, 4).map((x) => x.name).join(' and ')}`)}>Compare shortlist</button>}
+          </div>
         </section>
       </div>
     );
@@ -409,6 +411,7 @@ function Results({ r, onChoose, busy, isSaved, onSave }) {
           <dl className="sheet-figs">
             <div><dt>Minimum order</dt><dd className="num">{m.moq.toLocaleString()}</dd></div>
             <div><dt>Lead time</dt><dd className="num">{m.leadTimeDays} days</dd></div>
+            {m.priceRange && <div><dt>From</dt><dd className="num">{fmtMoney(m.priceRange.from)}</dd></div>}
           </dl>
           {m.certifications.length > 0 && <p className="sheet-certs">{m.certifications.join(', ')}</p>}
         </>
@@ -504,4 +507,16 @@ function Compare({ rows }) {
       </table>
     </div>
   );
+}
+
+// Save the brief so the inbox gets a note when a new manufacturer fits it.
+function SaveSearch({ query }) {
+  const { user, notify } = useApp();
+  const [saved, setSaved] = useState(false);
+  useEffect(() => setSaved(false), [query]);
+  async function save() {
+    if (!user) { notify('Sign in to save searches and get alerts.'); window.location.hash = `/signin?next=${encodeURIComponent('/')}`; return; }
+    try { await api.post('/me/saved', { query }); setSaved(true); notify('Saved. New matches arrive in your inbox.'); } catch (e) { notify(e.message); }
+  }
+  return <button type="button" className="text-btn" onClick={save} disabled={saved}>{saved ? 'Search saved for alerts' : 'Alert me to new matches'}</button>;
 }

@@ -297,6 +297,13 @@ export function builtinTurn(text, prev) {
     if (rows.length >= 2) { say(compareText(rows)); events.push({ type: 'compare', rows }); choices(['Start a new search']); return { events, state }; }
   }
 
+  // Quotes: how to ask several manufacturers at once.
+  if (/\b(get|request|ask for|send)\b.*\bquotes?\b|\brfq\b|quote request|price quote/.test(s)) {
+    const names = state.shown.filter((x) => store.getManufacturer(x)).slice(0, 3).map((x) => store.getManufacturer(x).name);
+    say(`Press **Save** on each manufacturer you like, then **Request quotes** in your shortlist. They each reply with a price a piece, a minimum order, a lead time and a sample cost, and you see the replies side by side.${names.length ? ` From this list I would ask ${listJoin(names)}.` : ''}`);
+    choices(names.length ? [`Tell me more about ${names[0]}`, 'Start a new search'] : ['Start a new search']);
+    return { events, state };
+  }
   // Show the last list again.
   if (/show (me )?(the )?other (options|brands|manufacturers)|back to (the )?(list|results)/.test(s) && state.brief) {
     const r = runSearch(state.side, briefQuery(state.brief));
@@ -380,6 +387,8 @@ How to work:
 - Use get_company when someone asks about one company, and compare_manufacturers when they want options side by side.
 - End every reply by calling suggest_replies with two to four short replies the person is likely to want next, written in their voice (for example "Only GOTS certified", "Compare the top 3", "How do I contact Kaveri?").
 - Write plainly, at most about 90 words per reply, in short paragraphs. Company names in **bold**. No headings, no bullet lists, no em dashes.
+- When someone wants prices or quotes, tell them to press Save on the manufacturers they like and then Request quotes in the shortlist panel; each one replies with price, minimum, lead time and sample cost, shown side by side.
+- Point out certificates the results mark as expired or not found in the register.
 - Only discuss sourcing for sustainable clothing and textiles. Politely steer anything else back.`;
 
 const TOOLS = [

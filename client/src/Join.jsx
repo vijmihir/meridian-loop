@@ -10,6 +10,7 @@ export default function Join({ side }) {
   const [f, setF] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(null);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
   const field = (k, label, props = {}, hint) => (
     <label className="field">{label}
@@ -25,8 +26,7 @@ export default function Join({ side }) {
     e.preventDefault(); setBusy(true); setErrors({});
     try {
       const r = await api.post('/join', { ...f, side });
-      refreshMeta(); notify('You’re listed. Your profile is searchable now.');
-      go(r.side === 'brand' ? `/b/${r.id}` : `/m/${r.id}`);
+      refreshMeta(); setDone(r);
     } catch (err) {
       setErrors(err.fields || {});
       const first = Object.keys(err.fields || {})[0];
@@ -35,6 +35,28 @@ export default function Join({ side }) {
     setBusy(false);
   }
 
+  if (done) {
+    const href = done.side === 'brand' ? `#/b/${done.id}` : `#/m/${done.id}`;
+    const rk = done.rank;
+    return (
+      <div className="wrap join">
+        <div className="page-head"><div>
+          <h1>{f.name} is listed</h1>
+          <p>Your profile is searchable now, and every company that fits has a note in its inbox.</p>
+        </div></div>
+        <div className="panel-box joined">
+          {rk && (done.side === 'maker'
+            ? <p>A brand asking for “{rk.query}” now finds you {rk.position ? <b>at number {rk.position} of {rk.of}</b> : <b>just outside the top results</b>}. Add prices, samples and certificates to move up.</p>
+            : <p>{rk.fits ? <><b>{rk.fits} manufacturers</b> meet everything in “{rk.query}”.</> : <>No manufacturer meets every requirement in “{rk.query}” yet.</>} Ask the assistant to narrow them down.</p>)}
+          <div className="btn-row">
+            <a className="btn" href={href}>See your profile</a>
+            <a className="btn btn-quiet" href="#/signin">Sign in as {f.name} to edit it</a>
+            {done.side === 'brand' && <a className="link" href={`#/?q=${encodeURIComponent(f.needTitle)}`}>Ask the assistant</a>}
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="wrap join">
       <div className="page-head">

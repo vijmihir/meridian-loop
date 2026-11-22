@@ -11,21 +11,27 @@ export default function Directory({ tab }) {
   const [brands, setBrands] = useState(null);
   const [country, setCountry] = useState('All');
   const [q, setQ] = useState('');
+  const [only, setOnly] = useState([]);
+  const flip = (k) => setOnly((o) => (o.includes(k) ? o.filter((x) => x !== k) : [...o, k]));
   const [mapOpen, setMapOpen] = useState(false);
   const [error, setError] = useState('');
   const load = () => { setError(''); api.get('/manufacturers').then(setMakers).catch((e) => setError(e.message)); api.get('/brands').then(setBrands).catch((e) => setError(e.message)); };
   useEffect(load, []);
-  useEffect(() => { setCountry('All'); setQ(''); }, [tab]);
+  useEffect(() => { setCountry('All'); setQ(''); setOnly([]); }, [tab]);
 
   const list = tab === 'brands' ? brands : makers;
   const countries = list ? ['All', ...[...new Set(list.map((x) => x.country))].sort()] : [];
   const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const shown = useMemo(() => (list || []).filter((x) => {
     if (country !== 'All' && x.country !== country) return false;
+    if (only.includes('checked') && !(x.certifications || []).some((c) => c.check?.status === 'checked' && !(c.validUntil && new Date(c.validUntil) < new Date()))) return false;
+    if (only.includes('dpp') && !x.dppReady) return false;
+    if (only.includes('whatsapp') && !x.whatsapp) return false;
+    if (only.includes('small') && !(x.moq <= 100)) return false;
     if (!words.length) return true;
     const hay = [x.name, x.city, x.country, x.makes, x.sells, ...(x.materials || []), ...(x.certifications || []).map((c) => c.name), ...(x.needs || []).map((n) => n.title)].join(' ').toLowerCase();
     return words.every((w) => hay.includes(w));
-  }), [list, country, q]); // eslint-disable-line react-hooks/exhaustive-deps
+  }), [list, country, q, only]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Shape the cards like search results so the map can show them.
   const forMap = shown.map((x) => (tab === 'brands'
@@ -55,6 +61,9 @@ export default function Directory({ tab }) {
       <div className="filters" role="group" aria-label="Country">
         {countries.map((c) => <button type="button" key={c} className="filter" aria-pressed={country === c} onClick={() => setCountry(c)}>{c}</button>)}
       </div>
+      {tab !== 'brands' && <div className="filters" role="group" aria-label="Only show">
+        {[['checked', 'Certificates checked'], ['dpp', 'Passport-ready'], ['whatsapp', 'On WhatsApp'], ['small', 'Runs of 100 or fewer']].map(([k, label]) => <button type="button" key={k} className="filter filter--flag" aria-pressed={only.includes(k)} onClick={() => flip(k)}>{label}</button>)}
+      </div>}
 
       {error && !list ? (
         <div className="notice" role="alert"><p>{error}</p><button type="button" className="text-btn" onClick={load}>Try again</button></div>

@@ -5,3 +5,5 @@ data/state.json
 .DS_Store
 
 .taste-skill/gate/
+client/.taste-skill/
+.taste-skill/gate-blocks.json

@@ -3,8 +3,10 @@
 import { Index, parseConstraints, describeConstraints } from './rag.js';
 import * as store from './store.js';
 import { locate } from './geo.js';
+import { certState } from '../data/enrich.js';
 
 let index = new Index();
+store.onCompaniesChange(() => rebuildIndex());
 const placeOf = (x) => (x.city === x.country ? x.city : `${x.city}, ${x.country}`);
 const lowerFirst = (t) => t.charAt(0).toLowerCase() + t.slice(1);
 // Everything here is clothing, so product categories are not worth showing as a filter.
@@ -16,8 +18,9 @@ export function rebuildIndex() {
   for (const m of store.getManufacturers()) {
     const where = `${m.city}, ${m.country}`;
     docs.push({ id: `${m.id}#about`, kind: 'maker', entityId: m.id, title: `${m.name}, ${where}`, text: `${m.name} in ${where} makes ${m.makes}. ${m.about}` });
-    docs.push({ id: `${m.id}#capability`, kind: 'maker', entityId: m.id, title: `${m.name}: materials and terms`, text: `Materials: ${m.materials.join(', ')}. Processes: ${m.processes.join(', ')}. Minimum order ${m.moq} units. Lead time ${m.leadTimeDays} days.` });
-    if (m.certifications.length) docs.push({ id: `${m.id}#certs`, kind: 'maker', entityId: m.id, title: `${m.name}: certifications`, text: m.certifications.map((c) => `${c.name} from ${c.issuer}${c.validUntil ? `, valid until ${fmtDate(c.validUntil)}` : ''}`).join('. ') + '.' });
+    docs.push({ id: `${m.id}#capability`, kind: 'maker', entityId: m.id, title: `${m.name}: materials and terms`, text: `Materials: ${m.materials.join(', ')}. Processes: ${m.processes.join(', ')}. Minimum order ${m.moq} units, ${m.moqPerColour} a colour. Lead time ${m.leadTimeDays} days.${m.priceRange ? ` Price ${m.priceRange.currency}${m.priceRange.from} to ${m.priceRange.to} a ${m.priceRange.unit}.` : ''} Samples ${m.sampleCost ? `US$${m.sampleCost} in ${m.sampleDays} days` : 'on request'}. Capacity ${m.capacityPerMonth?.toLocaleString()} a month. Ships ${(m.incoterms || []).join(', ')}.` });
+    docs.push({ id: `${m.id}#trace`, kind: 'maker', entityId: m.id, title: `${m.name}: traceability`, text: `${(m.traceability || []).map((t) => `${t.stage} ${t.level}`).join(', ')}.${m.dppReady ? ' Passport-ready: every stage documented for a digital product passport, traceable.' : ''}` });
+    if (m.certifications.length) docs.push({ id: `${m.id}#certs`, kind: 'maker', entityId: m.id, title: `${m.name}: certifications`, text: m.certifications.map((c) => `${c.name} from ${c.issuer}${c.validUntil ? `, valid until ${fmtDate(c.validUntil)}` : ''}${c.check?.status === 'checked' ? ', checked in the register' : c.check?.status === 'not-found' ? ', not found in the register' : ''}`).join('. ') + '.' });
   }
   for (const b of store.getBrands()) {
     docs.push({ id: `${b.id}#about`, kind: 'brand', entityId: b.id, title: `${b.name}, ${b.city}`, text: `${b.name} in ${b.city}, ${b.country} sells ${b.sells}. ${b.about} Values: ${b.values.join(', ')}.` });
@@ -64,7 +67,19 @@ function makerChecks(id, c) {
   const checks = [];
   if (c.countries.length) checks.push({ label: `In ${c.countries.join(' or ')}`, ok: c.countries.includes(m.country) });
   if (c.excludeCountries.length) checks.push({ label: `Outside ${c.excludeCountries.join(', ')}`, ok: !c.excludeCountries.includes(m.country) });
-  for (const want of c.certifications) checks.push({ label: `${want} certified`, ok: hasCert(m.certifications.map((x) => x.name), want) });
+  for (const want of c.certifications) {
+    const have = m.certifications.find((x) => hasCert([x.name], want));
+    const st = have ? certState(have) : null;
+    checks.push(!have ? { label: `${want} certified`, ok: false }
+      : st === 'expired' ? { label: `${want} expired`, ok: false }
+      : st === 'not-found' ? { label: `${want} not in the register`, ok: false }
+      : { label: `${want} certified${st === 'checked' ? ', checked' : ''}`, ok: !c.verifiedOnly || st === 'checked' });
+  }
+  if (c.verifiedOnly && !c.certifications.length) checks.push({ label: 'Certificates checked', ok: m.certifications.length > 0 && m.certifications.every((x) => certState(x) === 'checked') });
+  if (c.maxPrice && m.priceRange) checks.push({ label: `From US$${m.priceRange.from}, within US$${c.maxPrice}`, ok: m.priceRange.from <= c.maxPrice });
+  if (c.minCapacity && m.capacityPerMonth) checks.push({ label: `${m.capacityPerMonth.toLocaleString()} a month, at least ${c.minCapacity.toLocaleString()}`, ok: m.capacityPerMonth >= c.minCapacity });
+  if (c.needsDpp) checks.push({ label: 'Passport-ready', ok: Boolean(m.dppReady) });
+  if (c.vegan) checks.push({ label: 'Animal-free materials', ok: !/silk|wool|merino|leather(?!.*(cactus|apple))|cashmere/i.test(m.materials.join(' ')) || /cactus|apple/i.test(m.materials.join(' ')) });
   if (c.maxMoq) checks.push({ label: `Minimum order ${m.moq}, within ${c.maxMoq}`, ok: m.moq <= c.maxMoq });
   if (c.maxLeadDays) checks.push({ label: `Lead time ${m.leadTimeDays} days, within ${c.maxLeadDays}`, ok: m.leadTimeDays <= c.maxLeadDays });
   return checks;
@@ -105,7 +120,7 @@ export function search(side, query) {
   const sources = cite(ranked);
   const matches = ranked.map((r) => {
     const m = store.getManufacturer(r.id);
-    return { type: 'maker', id: m.id, name: m.name, place: placeOf(m), geo: locate(m.city, m.country), summary: m.makes, moq: m.moq, leadTimeDays: m.leadTimeDays, certifications: m.certifications.map((c) => c.name), checks: r.checks, meetsAll: r.meetsAll, why: r.passages[0].text, cite: ref(sources, m.id) };
+    return { type: 'maker', id: m.id, name: m.name, place: placeOf(m), geo: locate(m.city, m.country), priceRange: m.priceRange, dppReady: m.dppReady, summary: m.makes, moq: m.moq, leadTimeDays: m.leadTimeDays, certifications: m.certifications.map((c) => c.name), checks: r.checks, meetsAll: r.meetsAll, why: r.passages[0].text, cite: ref(sources, m.id) };
   });
   return { side, query, understood: understood(constraints), expansions, sources, matches, answer: composeMakers(matches, sources) };
 }

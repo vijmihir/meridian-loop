@@ -11,6 +11,7 @@ const CITIES = {
   Qingdao: [36.07, 120.38], Suzhou: [31.3, 120.62], 'Kampong Speu': [11.45, 104.52], Yogyakarta: [-7.8, 110.36], Faisalabad: [31.42, 73.08], Sialkot: [32.49, 74.53],
   Kathmandu: [27.72, 85.32], Kalibo: [11.71, 122.37], 'Luang Prabang': [19.89, 102.13], Kurashiki: [34.58, 133.77], Taipei: [25.03, 121.57],
   Sydney: [-33.87, 151.21], Melbourne: [-37.81, 144.96], Copenhagen: [55.68, 12.57], London: [51.51, -0.13], Berlin: [52.52, 13.4], Amsterdam: [52.37, 4.9],
+  Surat: [21.17, 72.83], Lahore: [31.55, 74.34], Brisbane: [-27.47, 153.03], Paris: [48.86, 2.35], Hamburg: [53.55, 9.99], Busan: [35.18, 129.08],
   Dubai: [25.2, 55.27], 'San Francisco': [37.77, -122.42], Toronto: [43.65, -79.38],
   Colombo: [6.93, 79.86], Bangkok: [13.76, 100.5], 'Hong Kong': [22.32, 114.17], Singapore: [1.35, 103.82], Seoul: [37.57, 126.98], Tokyo: [35.68, 139.69],
 };

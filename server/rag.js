@@ -36,7 +36,21 @@ const SYNONYM_GROUPS = [
   ['biodegradable fabric', 'biodegradable', 'jute', 'coir', 'banana fibre', 'hemp', 'lyocell', 'natural fibres'],
   ['waste cotton', 'recycled cotton', 'post-consumer textile waste', 'pre-consumer cutting waste', 'upcycling'],
   ['organic fabric', 'organic cotton', 'gots', 'organic silk'],
-  ['small moq', 'low moq', 'small batch', 'small runs', 'startup', 'emerging'],
+  ['small moq', 'low moq', 'small batch', 'small runs', 'startup', 'emerging', 'micro runs', 'deadstock'],
+  // what a garment should feel like or be for, mapped to the fibres and makers that deliver it
+  ['breathable', 'summer', 'hot weather', 'lightweight', 'linen', 'cotton voile', 'ramie', 'tencel', 'bamboo'],
+  ['warm', 'winter', 'cold weather', 'wool', 'merino', 'fleece', 'knitwear', 'sweaters'],
+  ['stretch', 'stretchy', 'elastane', 'seamless', 'leggings'],
+  ['moisture-wicking', 'quick-dry', 'sweat', 'running', 'recycled polyester', 'performance'],
+  ['luxury', 'premium', 'high end', 'silk', 'cashmere', 'tailoring', 'hand embroidery'],
+  ['children', 'school uniforms', 'kidswear'],
+  ['formal', 'office', 'smart', 'shirts', 'tailoring', 'suits', 'blazers'],
+  ['resort', 'beachwear', 'holiday', 'kaftans', 'sarongs', 'swimwear'],
+  ['traceable', 'traceability', 'product passport', 'digital product passport', 'dpp', 'documented', 'vertically integrated'],
+  ['embroidery', 'embellished', 'beadwork', 'zari'],
+  ['deadstock', 'surplus fabric', 'end of roll'],
+  ['merch', 'merchandise', 'event tees', 'printed tees', 'screen printing'],
+  ['outerwear', 'jackets', 'parkas', 'rain jackets', 'coats'],
 ];
 
 const SYN = new Map();
@@ -158,7 +172,7 @@ export const CERTS = [
 
 export function parseConstraints(q) {
   const s = q.toLowerCase();
-  const out = { countries: [], categories: [], certifications: [], maxMoq: null, maxLeadDays: null, maxPrice: null, budget: false, vegan: false, excludeCountries: [] };
+  const out = { countries: [], categories: [], certifications: [], maxMoq: null, maxLeadDays: null, maxPrice: null, budget: false, vegan: false, excludeCountries: [], minCapacity: null, verifiedOnly: false, needsDpp: false };
   for (const [c, keys] of Object.entries(COUNTRIES)) {
     for (const k of keys) {
       const re = new RegExp(`(not|outside|except|excluding|avoid)\\s+(from\\s+|in\\s+)?${k}\\b`);
@@ -177,9 +191,13 @@ export function parseConstraints(q) {
   if (m) out.maxLeadDays = parseInt(m[1], 10) * (m[2].startsWith('week') ? 7 : 1);
   else if (/(fast|quick|short) (lead|turnaround|delivery)|urgent|asap/.test(s)) out.maxLeadDays = 35;
 
-  m = s.match(/(?:under|below|less than|max|up to|<)\s*(?:us)?\$\s?(\d+)/) || s.match(/(\d+)\s*(?:usd|dollars)/);
-  if (m) out.maxPrice = parseInt(m[1], 10);
+  m = s.match(/(?:under|below|less than|max|up to|at|<)\s*(?:us)?\$\s?(\d+(?:\.\d+)?)/) || s.match(/(\d+(?:\.\d+)?)\s*(?:usd|dollars)/);
+  if (m) out.maxPrice = parseFloat(m[1]);
   if (/\bvegan\b|animal[- ]free|cruelty[- ]free/.test(s)) out.vegan = true;
+  m = s.match(/(\d[\d,]*)\s*(k)?\s*(?:units|pieces|pcs)?\s*(?:a|per|each)\s*month/);
+  if (m) out.minCapacity = parseInt(m[1].replace(/,/g, ''), 10) * (m[2] ? 1000 : 1);
+  if (/(checked|verified|confirmed)\s+(certific|certs?)|certificates?\s+(checked|verified)|verified only/.test(s)) out.verifiedOnly = true;
+  if (/product passport|\bdpp\b|traceab|every stage documented|fully documented/.test(s)) out.needsDpp = true;
   if (/cheap|low cost|low-cost|budget|affordable|cost[- ]effective|competitive pric/.test(s)) out.budget = true;
   return out;
 }
@@ -193,6 +211,9 @@ export function describeConstraints(c) {
   if (c.maxMoq) parts.push(`MOQ ≤ ${c.maxMoq}`);
   if (c.maxLeadDays) parts.push(`lead time ≤ ${c.maxLeadDays} days`);
   if (c.maxPrice) parts.push(`price ≤ $${c.maxPrice}`);
+  if (c.minCapacity) parts.push(`${c.minCapacity.toLocaleString()}+ a month`);
+  if (c.verifiedOnly) parts.push('checked certificates');
+  if (c.needsDpp) parts.push('passport-ready');
   if (c.vegan) parts.push('vegan');
   if (c.budget) parts.push('cost-sensitive');
   return parts;

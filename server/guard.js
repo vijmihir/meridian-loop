@@ -43,6 +43,7 @@ export function cleanState(raw) {
     brief: b && str(b.topic) ? {
       topic: str(b.topic), countries: strs(b.countries), certifications: strs(b.certifications),
       maxMoq: num(b.maxMoq), maxLeadDays: num(b.maxLeadDays), quantity: num(b.quantity),
+      maxPrice: num(b.maxPrice), minCapacity: num(b.minCapacity), verifiedOnly: b.verifiedOnly === true, needsDpp: b.needsDpp === true,
     } : null,
     shown: strs(s.shown, 12),
     focus: str(s.focus, 80) || null,
