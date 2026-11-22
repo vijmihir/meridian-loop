@@ -137,7 +137,7 @@ export class Index {
 }
 
 // ---------- Query understanding: pull structured constraints out of natural language ----------
-const COUNTRIES = {
+export const COUNTRIES = {
   India: ['india', 'indian'], Vietnam: ['vietnam', 'vietnamese', 'viet nam'], China: ['china', 'chinese', 'prc'],
   Bangladesh: ['bangladesh', 'bangladeshi'], Cambodia: ['cambodia', 'cambodian'], Indonesia: ['indonesia', 'indonesian', 'bali', 'java'],
 };
@@ -147,7 +147,7 @@ const CATEGORIES = {
   'Home Textiles': ['home', 'bedding', 'quilt', 'duvet', 'pillowcase', 'throw', 'blanket', 'rug', 'rugs', 'towel', 'towels', 'table linen', 'napkin', 'cushion', 'home textiles', 'swaddle'],
   Fashion: ['apparel', 'clothing', 'garment', 'garments', 't-shirt', 't-shirts', 'tee', 'tees', 'hoodie', 'leggings', 'activewear', 'jeans', 'denim', 'dress', 'dresses', 'jacket', 'loungewear', 'babywear', 'fashion', 'shirt', 'shirts'],
 };
-const CERTS = [
+export const CERTS = [
   ['GOTS', /\bgots\b|organic certif/], ['GRS', /\bgrs\b|global recycled/], ['RCS', /\brcs\b/], ['OEKO-TEX', /oeko[- ]?tex/],
   ['Fair Trade', /fair ?trade|wfto/], ['bluesign', /bluesign/], ['FSC', /\bfsc\b/], ['SA8000', /sa ?8000/], ['LWG', /\blwg\b|leather working group/],
   ['WRAP', /\bwrap\b/], ['Higg FEM', /\bhigg\b/], ['ZDHC', /\bzdhc\b/], ['amfori BSCI', /\bbsci\b|amfori/], ['SMETA', /smeta|sedex/],

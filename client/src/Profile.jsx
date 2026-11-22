@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from './api.js';
+import { materialPhoto } from './photos.js';
 
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Self-reported');
 const place = (x) => (x.city === x.country ? x.city : `${x.city}, ${x.country}`);
@@ -33,6 +34,17 @@ export default function Profile({ kind, id }) {
           <a className="btn" href={`mailto:${p.email}?subject=${encodeURIComponent(subject)}`}>Get in touch</a>
         </aside>
       </div>
+      {(() => {
+        const ph = materialPhoto(kind === 'maker' ? `${p.makes} ${p.materials.join(' ')}` : p.needs.map((n) => `${n.title} ${n.materials.join(' ')}`).join(' '));
+        return (
+          <figure className="photo">
+            <div className="photo-frame" data-slot="company">
+              <img src={ph.src} srcSet={ph.srcSet} sizes="(min-width: 72rem) 68rem, 100vw" alt={ph.alt} style={{ objectPosition: ph.position }} />
+            </div>
+            <figcaption>Stand-in photograph of {ph.subject}, shown until {p.name} adds its own. Photo: <a href={ph.page} rel="noopener">{ph.credit}</a>, {ph.license}.</figcaption>
+          </figure>
+        );
+      })()}
 
       {kind === 'maker' ? (
         <>

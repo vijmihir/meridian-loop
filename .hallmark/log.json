@@ -1,0 +1,28 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "loom",
+  "axes": "light/roman-serif/cool",
+  "nav": "top bar, wordmark and three destinations",
+  "footer": "none on the assistant; one line on other pages",
+  "imagery": "none",
+  "photos": [],
+  "entry": "empty state: question head, two role tiles, example prompts",
+  "sections": [
+   "assistant thread",
+   "match sheet",
+   "spec card",
+   "comparison table",
+   "composer"
+  ],
+  "signature": "the match sheet, ruled rows with each requirement checked",
+  "waived": [
+   "39b"
+  ],
+  "prompt": "chat-first sourcing assistant matching sustainable clothing brands and manufacturers",
+  "date": "2026-11-22"
+ }
+]

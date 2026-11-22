@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import * as store from './store.js';
 import * as engine from './engine.js';
 import { llmEnabled, MODEL, writeAnswer } from './llm.js';
+import { builtinTurn, claudeTurn } from './assistant.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const app = express();
@@ -29,6 +30,47 @@ app.post('/api/search', async (req, res) => {
     try { result.answer = await writeAnswer({ side, query, sources: result.sources }); result.mode = 'claude'; } catch { /* keep the built-in answer */ }
   }
   res.json(result);
+});
+
+// The assistant: one turn in, a stream of server-sent events out (see server/assistant.js).
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+app.post('/api/chat', async (req, res) => {
+  const raw = Array.isArray(req.body.messages) ? req.body.messages.slice(-20) : [];
+  const history = raw.map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: clean(m.content, 4000) })).filter((m) => m.content);
+  while (history.length && history[0].role !== 'user') history.shift();
+  const last = history[history.length - 1];
+  if (!last || last.role !== 'user') return res.status(400).json({ error: 'Say what you are looking for.' });
+  const state = req.body.state && typeof req.body.state === 'object' ? req.body.state : {};
+
+  res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
+  res.flushHeaders();
+  let closed = false;
+  res.on('close', () => { closed = true; });
+  const emit = (e) => { if (!closed) res.write(`data: ${JSON.stringify(e)}\n\n`); };
+
+  let mode = 'built-in';
+  if (llmEnabled()) {
+    let sent = 0;
+    try { await claudeTurn(history, (e) => { sent++; emit(e); }); mode = 'claude'; }
+    catch (err) {
+      console.error('Claude turn failed:', err?.message);
+      if (sent) { emit({ type: 'error', message: 'The assistant stopped partway. Try asking again.' }); emit({ type: 'done', mode: 'claude' }); return res.end(); }
+    }
+  }
+  if (mode === 'built-in') {
+    const turn = builtinTurn(last.content, state);
+    for (const e of turn.events) {
+      if (closed) break;
+      if (e.type === 'text') {
+        const words = e.text.split(/(?<=\s)/);
+        for (let i = 0; i < words.length; i += 4) { emit({ type: 'text', delta: words.slice(i, i + 4).join('') }); await pause(14); }
+        emit({ type: 'text', delta: '\n\n' });
+      } else { await pause(60); emit(e); }
+    }
+    emit({ type: 'state', state: turn.state });
+  }
+  emit({ type: 'done', mode });
+  res.end();
 });
 
 // Contact details stay out of lists; a profile shows them.
