@@ -1,16 +1,19 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useApp } from './App.jsx';
 import { api } from './api.js';
-import { HERO } from './photos.js';
+import { HERO, materialPhoto } from './photos.js';
+import MapDialog from './MapDialog.jsx';
 
 const STORE = 'meridian-chat-v1';
-const OPENERS = [
-  { role: 'brand', label: 'I’m a brand', text: 'Find a manufacturer for what you want made.', send: "I'm a brand looking for a manufacturer" },
-  { role: 'maker', label: 'I’m a manufacturer', text: 'Find brands looking for what you make.', send: "I'm a manufacturer looking for brands" },
-];
-const EXAMPLES = ['GOTS loungewear, small runs, India', 'Biodegradable fabric', 'We make waste cotton yarn and fabric', 'What is GOTS?'];
 
-const load = () => { try { return JSON.parse(sessionStorage.getItem(STORE)) || null; } catch { return null; } };
+// A saved conversation is only reused if it still has the shape this version expects.
+const load = () => {
+  try {
+    const v = JSON.parse(sessionStorage.getItem(STORE));
+    if (!v || !Array.isArray(v.messages) || !v.messages.every((m) => m && (m.role === 'user' ? typeof m.text === 'string' : Array.isArray(m.parts)))) return null;
+    return { messages: v.messages, convo: v.convo && typeof v.convo === 'object' ? v.convo : {}, shortlist: Array.isArray(v.shortlist) ? v.shortlist.filter((x) => x && x.id && x.name) : [] };
+  } catch { return null; }
+};
 const save = (v) => { try { sessionStorage.setItem(STORE, JSON.stringify(v)); } catch { /* private mode */ } };
 let uid = 0;
 const newId = () => `${Date.now().toString(36)}-${uid++}`;
@@ -52,6 +55,8 @@ export default function Chat({ initial }) {
   const [busy, setBusy] = useState(false);
   const inputRef = useRef(null);
   const sentInitial = useRef(false);
+  const ctrlRef = useRef(null);
+  useEffect(() => () => ctrlRef.current?.abort(), []);
 
   useEffect(() => { save({ messages: messages.filter((m) => !m.pending), convo, shortlist }); }, [messages, convo, shortlist]);
   // When a question is sent, bring it to the top so the reply reads downward from it.
@@ -63,20 +68,41 @@ export default function Chat({ initial }) {
   }, [turns]);
   useEffect(() => { if (initial && !sentInitial.current) { sentInitial.current = true; send(initial); } }, [initial]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const patchLast = (fn) => setMessages((ms) => { const copy = ms.slice(); copy[copy.length - 1] = fn({ ...copy[copy.length - 1] }); return copy; });
+  const patchLast = (fn) => setMessages((ms) => { if (!ms.length || ms[ms.length - 1].role !== 'assistant') return ms; const copy = ms.slice(); copy[copy.length - 1] = fn({ ...copy[copy.length - 1] }); return copy; });
 
-  async function send(text) {
+  async function send(text, side) {
     const t = (text ?? input).trim();
     if (!t || busy) return;
     setInput(''); setBusy(true);
+    const state = side && !convo.side ? { ...convo, side } : convo;
+    if (state !== convo) setConvo(state);
     const user = { id: newId(), role: 'user', text: t };
     const reply = { id: newId(), role: 'assistant', parts: [], choices: [], pending: true };
     const history = [...messages.filter((m) => !m.pending && !m.error), user].map(asHistory);
     setMessages((ms) => [...ms, user, reply]);
+    const ctrl = new AbortController(); ctrlRef.current = ctrl;
+    let idle; const touch = () => { clearTimeout(idle); idle = setTimeout(() => ctrl.abort('timeout'), 60_000); };
     try {
-      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, state: convo }) });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'The assistant could not be reached.');
+      // One quiet retry if the server is still waking up; nothing has been shown yet, so it is safe.
+      let res;
+      for (let attempt = 0; ; attempt++) {
+        touch();
+        try {
+          res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history, state }), signal: ctrl.signal });
+          if ([502, 503, 504].includes(res.status) && attempt < 2) { await new Promise((r) => setTimeout(r, 2000)); continue; }
+          break;
+        } catch (err) {
+          if (ctrl.signal.aborted || attempt >= 2) throw err;
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+      }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || (res.status === 429 ? 'Too many questions in a minute. Wait a moment.' : 'The assistant could not be reached.'));
+      }
+      let done = false;
       for await (const e of events(res)) {
+        touch();
         if (e.type === 'text') patchLast((m) => {
           const parts = m.parts.slice(); const lastPart = parts[parts.length - 1];
           if (lastPart?.kind === 'text') parts[parts.length - 1] = { ...lastPart, text: lastPart.text + e.delta };
@@ -84,15 +110,18 @@ export default function Chat({ initial }) {
           return { ...m, parts };
         });
         else if (e.type === 'results' || e.type === 'profile' || e.type === 'compare') patchLast((m) => ({ ...m, parts: [...m.parts, { ...e, kind: e.type }] }));
-        else if (e.type === 'choices') patchLast((m) => ({ ...m, choices: e.options }));
-        else if (e.type === 'state') setConvo(e.state);
-        else if (e.type === 'error') patchLast((m) => ({ ...m, error: e.message }));
-        else if (e.type === 'done') patchLast((m) => ({ ...m, mode: e.mode }));
+        else if (e.type === 'choices') patchLast((m) => ({ ...m, choices: Array.isArray(e.options) ? e.options : [] }));
+        else if (e.type === 'state') setConvo(e.state || {});
+        else if (e.type === 'error') patchLast((m) => ({ ...m, error: e.message, retry: t }));
+        else if (e.type === 'done') { done = true; patchLast((m) => ({ ...m, mode: e.mode })); }
       }
-      patchLast((m) => ({ ...m, pending: false }));
+      patchLast((m) => (done ? { ...m, pending: false } : { ...m, pending: false, error: 'The answer was cut off. Try again.', retry: t }));
     } catch (err) {
-      patchLast((m) => ({ ...m, pending: false, error: err.message || 'Something went wrong.', retry: t }));
-    }
+      const stopped = ctrl.signal.aborted && ctrl.signal.reason !== 'timeout';
+      const msg = stopped ? 'Stopped.' : ctrl.signal.reason === 'timeout' ? 'That took too long. Try again.'
+        : navigator.onLine === false ? 'You seem to be offline. Try again when you are back.' : (err.message && !/fetch|network/i.test(err.message) ? err.message : 'Could not reach the assistant. Try again.');
+      patchLast((m) => ({ ...m, pending: false, error: msg, retry: t }));
+    } finally { clearTimeout(idle); ctrlRef.current = null; }
     setBusy(false);
     inputRef.current?.focus();
   }
@@ -103,6 +132,7 @@ export default function Chat({ initial }) {
   }
 
   function restart() {
+    ctrlRef.current?.abort('stop');
     setMessages([]); setConvo({}); setInput('');
     inputRef.current?.focus();
   }
@@ -115,11 +145,11 @@ export default function Chat({ initial }) {
     <div className={`chat ${empty ? 'is-empty' : 'has-side'}`}>
       <div className="chat-main">
       <div className="chat-scroll">
-        {empty ? <Start onSend={send} /> : null}
+        {empty ? <Start onSend={send} busy={busy} /> : null}
         {empty ? null : (
           <div className="thread" aria-live="polite" aria-busy={busy}>
             <div className="thread-bar">
-              <button type="button" className="text-btn" onClick={restart} disabled={busy}>New conversation</button>
+              <button type="button" className="text-btn" onClick={restart}>New conversation</button>
             </div>
             <div className="side-inline"><Side brief={brief} shortlist={shortlist} onRemove={toggleSave} onSend={send} busy={busy} compact /></div>
             {messages.map((m) => m.role === 'user'
@@ -130,21 +160,23 @@ export default function Chat({ initial }) {
         )}
       </div>
 
-      <div className="composer-wrap">
+      {!empty && <div className="composer-wrap">
         <form className="composer" onSubmit={(e) => { e.preventDefault(); send(); }}>
           <label htmlFor="ask" className="visually-hidden">Message the sourcing assistant</label>
           <textarea
             id="ask" ref={inputRef} rows={1} value={input} autoComplete="off"
-            placeholder={convo.side === 'maker' ? 'Describe what you make' : 'Describe what you need made'}
+            placeholder="Ask a follow-up"
             onChange={(e) => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`; }}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
           />
-          <button type="submit" className="btn" disabled={!input.trim() || busy}>{busy ? 'Working' : 'Send'}</button>
+          {busy
+            ? <button type="button" className="btn btn-quiet" onClick={() => ctrlRef.current?.abort('stop')}>Stop</button>
+            : <button type="submit" className="btn" disabled={!input.trim()}>Send</button>}
         </form>
         <p className="composer-note">
           {meta?.answers === 'claude' ? 'Answers by Claude, from company profiles on Meridian Loop.' : 'Answers from company profiles on Meridian Loop.'} Every company in this demo is fictional.
         </p>
-      </div>
+      </div>}
       </div>
       {!empty && <aside className="side" aria-label="Your brief and shortlist"><Side brief={brief} shortlist={shortlist} onRemove={toggleSave} onSend={send} busy={busy} /></aside>}
     </div>
@@ -153,69 +185,72 @@ export default function Chat({ initial }) {
 
 // ---------- the opening screen ----------
 
-function Start({ onSend }) {
+function Start({ onSend, busy }) {
   const [makers, setMakers] = useState(null);
   const [brands, setBrands] = useState(null);
+  const [role, setRole] = useState('brand');
+  const [text, setText] = useState('');
   useEffect(() => { api.get('/manufacturers').then(setMakers).catch(() => setMakers([])); api.get('/brands').then(setBrands).catch(() => setBrands([])); }, []);
   const countries = makers ? new Set(makers.map((m) => m.country)).size : null;
   const schemes = makers ? new Set(makers.flatMap((m) => m.certifications.map((c) => c.name.replace(/ (Standard|Textile|USA|Chain of Custody).*$/, '')))).size : null;
   const requests = brands ? brands.flatMap((b) => b.needs.map((n) => ({ brand: b, need: n }))).sort((a, b) => b.need.quantity - a.need.quantity).slice(0, 4) : null;
+  const ask = (t) => onSend(t, role);
+  const copy = role === 'brand'
+    ? { head: 'Find who makes it.', lead: 'Describe what you need made. The assistant searches every sustainable manufacturer on Meridian Loop and tells you who fits, and why.', hint: 'Organic cotton T-shirts, 500 units', examples: ['GOTS loungewear, small runs, India', 'Low-water denim in Bangladesh', 'Biodegradable fabric'] }
+    : { head: 'Find who needs it.', lead: 'Describe what you make. The assistant finds the clothing brands on Meridian Loop asking for it, and what they want.', hint: 'Organic cotton babywear', examples: ['We make waste cotton yarn and fabric', 'Peace silk scarves', 'Recycled polyester, small runs'] };
 
   return (
     <div className="start">
       <section className="start-hero" aria-labelledby="start-head">
-        <div className="start-copy">
-          <h1 id="start-head">What are you sourcing?</h1>
-          <p className="lead">Tell the assistant in plain words. It searches every manufacturer and brand on Meridian Loop and shows where each answer comes from.</p>
-          <div className="openers">
-            {OPENERS.map((o) => (
-              <button key={o.role} type="button" className="opener" onClick={() => onSend(o.send)}>
-                <span className="opener-title">{o.label}</span>
-                <span className="opener-text">{o.text}</span>
-              </button>
-            ))}
+        <img className="start-bg" src={HERO.src} srcSet={HERO.srcSet} sizes="100vw" alt="" width={HERO.w} height={HERO.h} style={{ objectPosition: HERO.position }} />
+        <div className="start-inner">
+          <h1 id="start-head">{copy.head}</h1>
+          <p className="start-lead">{copy.lead}</p>
+          <div className="start-roles" role="group" aria-label="I am">
+            <button type="button" aria-pressed={role === 'brand'} onClick={() => setRole('brand')}>I’m a brand</button>
+            <button type="button" aria-pressed={role === 'maker'} onClick={() => setRole('maker')}>I’m a manufacturer</button>
           </div>
-          <div className="examples" aria-label="Try asking">
-            <span className="examples-label">Or try</span>
-            {EXAMPLES.map((e) => <button key={e} type="button" className="chip" onClick={() => onSend(e)}>{e}</button>)}
+          <form className="start-ask" onSubmit={(e) => { e.preventDefault(); ask(text); }}>
+            <label htmlFor="start-q" className="visually-hidden">{role === 'brand' ? 'Describe what you need made' : 'Describe what you make'}</label>
+            <input id="start-q" value={text} onChange={(e) => setText(e.target.value)} placeholder={copy.hint} autoComplete="off" />
+            <button type="submit" className="btn" disabled={!text.trim() || busy}>Ask</button>
+          </form>
+          <div className="start-examples" aria-label="Try asking">
+            {copy.examples.map((e) => <button key={e} type="button" onClick={() => ask(e)}>{e}</button>)}
           </div>
         </div>
-        <figure className="start-photo">
-          <div className="photo-frame" data-slot="hero">
-            <img src={HERO.src} srcSet={HERO.srcSet} sizes="(min-width: 60rem) 34rem, 100vw" alt={HERO.alt} width={HERO.w} height={HERO.h} style={{ objectPosition: HERO.position }} />
+        <p className="start-credit">{HERO.caption} Photo: <a href={HERO.page} rel="noopener">{HERO.credit}</a>, {HERO.license}.</p>
+      </section>
+
+      <div className="start-below">
+        <section className="start-now" aria-labelledby="now-head">
+          <h2 id="now-head">On Meridian Loop now</h2>
+          <dl className="figures">
+            <div><dt>Manufacturers</dt><dd>{makers ? makers.length : ''}</dd></div>
+            <div><dt>Brands</dt><dd>{brands ? brands.length : ''}</dd></div>
+            <div><dt>Countries making</dt><dd>{countries ?? ''}</dd></div>
+            <div><dt>Certification schemes</dt><dd>{schemes ?? ''}</dd></div>
+          </dl>
+          <div className="requests">
+            <h3>Open requests from brands</h3>
+            {!requests ? <div className="skeleton-rows" aria-hidden="true"><i /><i /></div> : (
+              <ul>
+                {requests.map(({ brand, need }) => (
+                  <li key={brand.id + need.title}>
+                    <div>
+                      <b>{need.title}</b>
+                      <span className="where">{brand.name}, {brand.city}</span>
+                    </div>
+                    <span className="num">{need.quantity.toLocaleString()} units</span>
+                    <button type="button" className="text-btn" onClick={() => onSend(`Tell me more about ${brand.name}`, 'maker')}>Ask about this</button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          <figcaption>{HERO.caption} Photo: <a href={HERO.page} rel="noopener">{HERO.credit}</a>, {HERO.license}.</figcaption>
-        </figure>
-      </section>
-
-      <section className="start-now" aria-labelledby="now-head">
-        <h2 id="now-head">On Meridian Loop now</h2>
-        <dl className="figures">
-          <div><dt>Manufacturers</dt><dd>{makers ? makers.length : ''}</dd></div>
-          <div><dt>Brands</dt><dd>{brands ? brands.length : ''}</dd></div>
-          <div><dt>Countries making</dt><dd>{countries ?? ''}</dd></div>
-          <div><dt>Certification schemes</dt><dd>{schemes ?? ''}</dd></div>
-        </dl>
-        <div className="requests">
-          <h3>Open requests from brands</h3>
-          {!requests ? <div className="skeleton-rows" aria-hidden="true"><i /><i /></div> : (
-            <ul>
-              {requests.map(({ brand, need }) => (
-                <li key={brand.id + need.title}>
-                  <div>
-                    <b>{need.title}</b>
-                    <span className="where">{brand.name}, {brand.city}</span>
-                  </div>
-                  <span className="num">{need.quantity.toLocaleString()} units</span>
-                  <button type="button" className="text-btn" onClick={() => onSend(`Tell me more about ${brand.name}`)}>Ask about this</button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-
-      <p className="origin">Meridian Loop grew out of <a className="link" href="https://srishtipal86.wixsite.com/sustainableindia" rel="noopener">Sustainable India</a>, which set out in 2019 to be the bridge between manufacturers and designers. Every company in this demo is fictional.</p>
+        </section>
+        <p className="origin">Meridian Loop grew out of <a className="link" href="https://srishtipal86.wixsite.com/sustainableindia" rel="noopener">Sustainable India</a>, which set out in 2019 to be the bridge between manufacturers and designers. Every company in this demo is fictional.</p>
+      </div>
     </div>
   );
 }
@@ -357,8 +392,10 @@ function Results({ r, onChoose, busy, isSaved, onSave }) {
   const makers = r.side !== 'maker';
   const fits = r.matches.filter((m) => m.meetsAll);
   const close = r.matches.filter((m) => !m.meetsAll);
-  const row = (m) => (
+  const [mapOpen, setMapOpen] = useState(false);
+  const row = (m) => { const ph = materialPhoto(makers ? m.summary : `${m.need.title} ${(m.need.materials || []).join(' ')}`); return (
     <li key={m.id} className="sheet-row">
+      <img className="sheet-thumb" src={ph.src} alt="" loading="lazy" style={{ objectPosition: ph.position }} />
       <div className="sheet-name">
         {onChoose
           ? <button type="button" className="name-btn" disabled={busy} onClick={() => onChoose(`Tell me more about ${m.name}`)}>{m.name}</button>
@@ -386,13 +423,16 @@ function Results({ r, onChoose, busy, isSaved, onSave }) {
       )}
       <Checks checks={m.checks} />
     </li>
-  );
+  ); };
+  const mapped = r.matches.filter((m) => m.geo).length;
   return (
     <section className="sheet" aria-label={makers ? 'Matching manufacturers' : 'Matching brands'}>
       <div className="sheet-head">
         <h2>{r.matches.length} {makers ? (r.matches.length === 1 ? 'manufacturer' : 'manufacturers') : (r.matches.length === 1 ? 'brand' : 'brands')}</h2>
         {r.understood.length > 0 && <ul className="tags" aria-label="Your requirements">{r.understood.map((u) => <li key={u} className="tag">{u}</li>)}</ul>}
+        {mapped > 0 && <button type="button" className="map-btn" onClick={() => setMapOpen(true)}>Show on map</button>}
       </div>
+      <MapDialog open={mapOpen} onClose={() => setMapOpen(false)} matches={[...fits, ...close]} title={`${r.matches.length} ${makers ? 'manufacturers' : 'brands'} for your brief`} />
       <ol className="sheet-list">{fits.map(row)}</ol>
       {close.length > 0 && (
         <>

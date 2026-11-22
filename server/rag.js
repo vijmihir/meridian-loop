@@ -140,6 +140,8 @@ export class Index {
 export const COUNTRIES = {
   India: ['india', 'indian'], Vietnam: ['vietnam', 'vietnamese', 'viet nam'], China: ['china', 'chinese', 'prc'],
   Bangladesh: ['bangladesh', 'bangladeshi'], Cambodia: ['cambodia', 'cambodian'], Indonesia: ['indonesia', 'indonesian', 'bali', 'java'],
+  'Sri Lanka': ['sri lanka', 'sri lankan', 'lanka'], Thailand: ['thailand', 'thai'], Pakistan: ['pakistan', 'pakistani'], Nepal: ['nepal', 'nepali', 'nepalese'],
+  Philippines: ['philippines', 'filipino', 'philippine'], Laos: ['laos', 'lao'], Japan: ['japan', 'japanese'],
 };
 const CATEGORIES = {
   Footwear: ['shoe', 'shoes', 'footwear', 'sneaker', 'sneakers', 'sandal', 'sandals', 'trainers', 'boots', 'espadrille'],
@@ -151,7 +153,7 @@ export const CERTS = [
   ['GOTS', /\bgots\b|organic certif/], ['GRS', /\bgrs\b|global recycled/], ['RCS', /\brcs\b/], ['OEKO-TEX', /oeko[- ]?tex/],
   ['Fair Trade', /fair ?trade|wfto/], ['bluesign', /bluesign/], ['FSC', /\bfsc\b/], ['SA8000', /sa ?8000/], ['LWG', /\blwg\b|leather working group/],
   ['WRAP', /\bwrap\b/], ['Higg FEM', /\bhigg\b/], ['ZDHC', /\bzdhc\b/], ['amfori BSCI', /\bbsci\b|amfori/], ['SMETA', /smeta|sedex/],
-  ['PETA', /\bpeta\b|vegan certif/], ['ISO 14001', /iso ?14001/],
+  ['PETA', /\bpeta\b|vegan certif/], ['OCS', /\bocs\b|organic content standard/], ['RWS', /\brws\b|responsible wool/], ['ISO 14001', /iso ?14001/],
 ];
 
 export function parseConstraints(q) {

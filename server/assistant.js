@@ -11,6 +11,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import * as engine from './engine.js';
 import * as store from './store.js';
+import { locate } from './geo.js';
 import { parseConstraints, COUNTRIES, CERTS, tokenize, expandQuery } from './rag.js';
 
 export const MODEL = process.env.MERIDIAN_MODEL || 'claude-opus-5-5';
@@ -24,15 +25,15 @@ const listJoin = (a) => (a.length < 2 ? a.join('') : `${a.slice(0, -1).join(', '
 // ---------- shared views of the data ----------
 
 export function makerView(m) {
-  return { type: 'maker', id: m.id, name: m.name, place: placeOf(m), country: m.country, founded: m.founded, makes: m.makes, about: m.about, materials: m.materials, processes: m.processes, moq: m.moq, leadTimeDays: m.leadTimeDays, certifications: m.certifications.map((c) => ({ name: c.name, issuer: c.issuer, validUntil: c.validUntil })), contact: m.contact, email: m.email };
+  return { type: 'maker', id: m.id, name: m.name, place: placeOf(m), geo: locate(m.city, m.country), country: m.country, founded: m.founded, makes: m.makes, about: m.about, materials: m.materials, processes: m.processes, moq: m.moq, leadTimeDays: m.leadTimeDays, certifications: m.certifications.map((c) => ({ name: c.name, issuer: c.issuer, validUntil: c.validUntil })), contact: m.contact, email: m.email };
 }
 export function brandView(b) {
-  return { type: 'brand', id: b.id, name: b.name, place: placeOf(b), country: b.country, founded: b.founded, sells: b.sells, about: b.about, values: b.values, needs: b.needs, contact: b.contact, email: b.email };
+  return { type: 'brand', id: b.id, name: b.name, place: placeOf(b), geo: locate(b.city, b.country), country: b.country, founded: b.founded, sells: b.sells, about: b.about, values: b.values, needs: b.needs, contact: b.contact, email: b.email };
 }
 const findEntity = (id) => { const m = store.getManufacturer(id); if (m) return makerView(m); const b = store.getBrand(id); return b ? brandView(b) : null; };
 
 function compareRows(ids) {
-  return ids.map((id) => store.getManufacturer(id)).filter(Boolean).slice(0, 4).map((m) => ({ id: m.id, name: m.name, place: placeOf(m), makes: m.makes, materials: m.materials.slice(0, 4), moq: m.moq, leadTimeDays: m.leadTimeDays, certifications: m.certifications.map((c) => c.name) }));
+  return ids.map((id) => store.getManufacturer(id)).filter(Boolean).slice(0, 4).map((m) => ({ id: m.id, name: m.name, place: placeOf(m), geo: locate(m.city, m.country), makes: m.makes, materials: m.materials.slice(0, 4), moq: m.moq, leadTimeDays: m.leadTimeDays, certifications: m.certifications.map((c) => c.name) }));
 }
 
 // Search, renumbering sources so citations stay unique across a turn.
@@ -393,8 +394,9 @@ const isStr = (v) => typeof v === 'string' && v.trim().length > 0;
 const isStrArr = (v) => Array.isArray(v) && v.every(isStr);
 
 let client;
-export async function claudeTurn(history, emit) {
-  client ||= new Anthropic();
+export async function claudeTurn(history, emit, side) {
+  // Time-boxed: a slow or stuck API call falls back to the built-in assistant instead of hanging the page.
+  client ||= new Anthropic({ timeout: 45_000, maxRetries: 1 });
   const messages = history.map((m) => ({ role: m.role, content: m.content }));
   let cites = 0, wrote = false;
   for (let step = 0; step < 6; step++) {
@@ -402,7 +404,7 @@ export async function claudeTurn(history, emit) {
       model: MODEL, max_tokens: 8000,
       betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default',
       output_config: { effort: 'low' },
-      system: SYSTEM, tools: TOOLS, messages,
+      system: side ? `${SYSTEM}\n\nThe person chose on the home page that they are ${side === 'maker' ? 'a manufacturer looking for brands' : 'a brand looking for a manufacturer'}.` : SYSTEM, tools: TOOLS, messages,
     });
     stream.on('text', (delta) => { wrote = true; emit({ type: 'text', delta }); });
     const msg = await stream.finalMessage();

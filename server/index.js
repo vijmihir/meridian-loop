@@ -4,23 +4,36 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import * as store from './store.js';
+import { locate } from './geo.js';
 import * as engine from './engine.js';
 import { llmEnabled, MODEL, writeAnswer } from './llm.js';
 import { builtinTurn, claudeTurn } from './assistant.js';
+import { rateLimit, securityHeaders, cleanState } from './guard.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const started = Date.now();
 export const app = express();
+app.set('trust proxy', 1); // Render sits behind one proxy; this keeps rate limits per visitor
+app.disable('x-powered-by');
+app.use(securityHeaders);
 app.use(express.json({ limit: '100kb' }));
 engine.rebuildIndex();
+
+const chatLimit = rateLimit({ windowMs: 60_000, max: 30, message: 'That is a lot of questions in a minute. Wait a moment and ask again.' });
+const writeLimit = rateLimit({ windowMs: 10 * 60_000, max: 10, message: 'Too many listings from here. Try again in a few minutes.' });
+const readLimit = rateLimit({ windowMs: 60_000, max: 240, message: 'Too many requests. Wait a moment.' });
+app.use('/api', readLimit);
+
+app.get('/api/health', (req, res) => res.json({ ok: true, uptime: Math.round((Date.now() - started) / 1000), ...engine.stats() }));
 
 const notFound = (res) => res.status(404).json({ error: 'Not found' });
 const clean = (v, n = 200) => String(v ?? '').trim().slice(0, n);
 const list = (v) => clean(v, 400).split(',').map((x) => x.trim()).filter(Boolean).slice(0, 12);
-const COUNTRIES_MAKERS = ['India', 'Vietnam', 'China', 'Bangladesh', 'Cambodia', 'Indonesia', 'Sri Lanka', 'Thailand', 'Other'];
+const COUNTRIES_MAKERS = ['India', 'Vietnam', 'China', 'Bangladesh', 'Cambodia', 'Indonesia', 'Sri Lanka', 'Thailand', 'Pakistan', 'Nepal', 'Philippines', 'Laos', 'Japan', 'Other'];
 
 app.get('/api/meta', (req, res) => res.json({ ...engine.stats(), answers: llmEnabled() ? 'claude' : 'built-in', demo: process.env.DEMO_MODE !== '0' }));
 
-app.post('/api/search', async (req, res) => {
+app.post('/api/search', chatLimit, async (req, res) => {
   const side = req.body.side === 'maker' ? 'maker' : 'brand';
   const query = clean(req.body.query, 300);
   if (!query) return res.status(400).json({ error: 'Type what you are looking for.' });
@@ -34,31 +47,38 @@ app.post('/api/search', async (req, res) => {
 
 // The assistant: one turn in, a stream of server-sent events out (see server/assistant.js).
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', chatLimit, async (req, res) => {
   const raw = Array.isArray(req.body.messages) ? req.body.messages.slice(-20) : [];
   const history = raw.map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: clean(m.content, 4000) })).filter((m) => m.content);
   while (history.length && history[0].role !== 'user') history.shift();
   const last = history[history.length - 1];
   if (!last || last.role !== 'user') return res.status(400).json({ error: 'Say what you are looking for.' });
-  const state = req.body.state && typeof req.body.state === 'object' ? req.body.state : {};
+  const state = cleanState(req.body.state);
 
   res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
   res.flushHeaders();
   let closed = false;
-  res.on('close', () => { closed = true; });
+  // A comment line every 15 seconds keeps proxies from closing a quiet stream.
+  const beat = setInterval(() => { if (!closed) res.write(': keep-alive\n\n'); }, 15_000);
+  res.on('close', () => { closed = true; clearInterval(beat); });
   const emit = (e) => { if (!closed) res.write(`data: ${JSON.stringify(e)}\n\n`); };
 
   let mode = 'built-in';
   if (llmEnabled()) {
     let sent = 0;
-    try { await claudeTurn(history, (e) => { sent++; emit(e); }); mode = 'claude'; }
+    try { await claudeTurn(history, (e) => { sent++; emit(e); }, state.side === 'maker' ? 'maker' : state.side === 'brand' ? 'brand' : null); mode = 'claude'; }
     catch (err) {
       console.error('Claude turn failed:', err?.message);
       if (sent) { emit({ type: 'error', message: 'The assistant stopped partway. Try asking again.' }); emit({ type: 'done', mode: 'claude' }); return res.end(); }
     }
   }
   if (mode === 'built-in') {
-    const turn = builtinTurn(last.content, state);
+    let turn;
+    try { turn = builtinTurn(last.content, state); }
+    catch (err) {
+      console.error('Built-in turn failed:', err);
+      turn = { events: [{ type: 'text', text: 'Something went wrong on my side with that one. Try rephrasing, or start a new search.' }, { type: 'choices', options: ['Start a new search'] }], state };
+    }
     for (const e of turn.events) {
       if (closed) break;
       if (e.type === 'text') {
@@ -70,19 +90,20 @@ app.post('/api/chat', async (req, res) => {
     emit({ type: 'state', state: turn.state });
   }
   emit({ type: 'done', mode });
+  clearInterval(beat);
   res.end();
 });
 
 // Contact details stay out of lists; a profile shows them.
-const makerCard = ({ email, contact, ...m }) => m;
-const brandCard = ({ email, contact, ...b }) => b;
+const makerCard = ({ email, contact, ...m }) => ({ ...m, geo: locate(m.city, m.country) });
+const brandCard = ({ email, contact, ...b }) => ({ ...b, geo: locate(b.city, b.country) });
 app.get('/api/manufacturers', (req, res) => res.json(store.getManufacturers().map(makerCard)));
 app.get('/api/brands', (req, res) => res.json(store.getBrands().map(brandCard)));
 app.get('/api/manufacturers/:id', (req, res) => { const m = store.getManufacturer(req.params.id); m ? res.json(m) : notFound(res); });
 app.get('/api/brands/:id', (req, res) => { const b = store.getBrand(req.params.id); b ? res.json(b) : notFound(res); });
 
 // Join: a manufacturer lists what it makes, a brand lists what it needs. Both become searchable at once.
-app.post('/api/join', (req, res) => {
+app.post('/api/join', writeLimit, (req, res) => {
   const b = req.body, side = b.side === 'brand' ? 'brand' : 'maker';
   const errors = {};
   const name = clean(b.name, 80), contact = clean(b.contact, 80), email = clean(b.email, 120).toLowerCase();
@@ -102,6 +123,9 @@ app.post('/api/join', (req, res) => {
     if (!(Number(b.quantity) > 0)) errors.quantity = 'Add a rough quantity.';
   }
   if (Object.keys(errors).length) return res.status(400).json({ error: 'Check the highlighted fields.', fields: errors });
+  const taken = [...store.getManufacturers(), ...store.getBrands()].some((x) => x.name.toLowerCase() === name.toLowerCase());
+  if (taken) return res.status(409).json({ error: 'A company with that name is already listed.', fields: { name: 'This name is already on Meridian Loop.' } });
+  if (store.joinedCount() >= store.MAX_JOINED) return res.status(503).json({ error: 'The demo has reached its listing limit. Reset the demo to add more.' });
 
   const rec = side === 'maker'
     ? store.addManufacturer({
@@ -123,13 +147,32 @@ app.post('/api/reset', (req, res) => {
   store.resetState(); engine.rebuildIndex(); res.json({ ok: true });
 });
 
+app.use('/api', (req, res) => notFound(res));
+
 const dist = path.join(here, '..', 'dist');
 if (fs.existsSync(dist)) {
-  app.use(express.static(dist));
-  app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(dist, 'index.html')));
+  // Built assets have hashed names, so they can be cached for a year; the page itself never is.
+  app.use('/assets', express.static(path.join(dist, 'assets'), { immutable: true, maxAge: '365d' }));
+  app.use(express.static(dist, { maxAge: 0 }));
+  app.get(/^(?!\/api).*/, (req, res) => { res.set('Cache-Control', 'no-cache'); res.sendFile(path.join(dist, 'index.html')); });
 }
+
+// Any error that slips through becomes a short JSON answer, never a stack trace.
+app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  if (err?.type === 'entity.parse.failed') return res.status(400).json({ error: 'That request was not valid JSON.' });
+  if (err?.type === 'entity.too.large') return res.status(413).json({ error: 'That request is too large.' });
+  console.error('Unhandled error:', err);
+  if (res.headersSent) return res.end();
+  res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+});
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   const PORT = Number(process.env.PORT) || 8787;
-  app.listen(PORT, () => console.log(`Meridian Loop running at http://localhost:${PORT} (answers: ${llmEnabled() ? `Claude, ${MODEL}` : 'built-in'})`));
+  const server = app.listen(PORT, () => console.log(`Meridian Loop running at http://localhost:${PORT} (answers: ${llmEnabled() ? `Claude, ${MODEL}` : 'built-in'})`));
+  server.keepAliveTimeout = 65_000; // longer than the proxy's, so it never reuses a closed socket
+  server.headersTimeout = 66_000;
+  process.on('unhandledRejection', (err) => console.error('Unhandled rejection:', err));
+  const stop = (sig) => { console.log(`${sig}: closing`); server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 8000).unref(); };
+  process.on('SIGTERM', () => stop('SIGTERM'));
+  process.on('SIGINT', () => stop('SIGINT'));
 }

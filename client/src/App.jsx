@@ -26,13 +26,19 @@ export default function App() {
   const [toast, setToast] = useState('');
   useEffect(() => { api.get('/meta').then(setMeta).catch(() => {}); }, []);
   const notify = (t) => { setToast(t); setTimeout(() => setToast(''), 3500); };
+  const [online, setOnline] = useState(typeof navigator === 'undefined' || navigator.onLine !== false);
+  useEffect(() => {
+    const up = () => setOnline(true), down = () => setOnline(false);
+    window.addEventListener('online', up); window.addEventListener('offline', down);
+    return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down); };
+  }, []);
   const [page, id] = parts;
   const onChat = !page || page === 'search';
   const here = (p) => ((p === 'chat' ? onChat : page === p) ? 'page' : undefined);
 
   async function reset() {
     if (!confirm('Remove every company that joined during the demo?')) return;
-    await api.post('/reset'); notify('Demo reset.'); go('/');
+    try { await api.post('/reset'); notify('Demo reset.'); go('/'); } catch (e) { notify(e.message); }
   }
 
   return (
@@ -60,6 +66,7 @@ export default function App() {
           <p>Demo: every company here is fictional.{meta?.demo && <> <button type="button" className="link-btn" onClick={reset}>Reset demo</button></>}</p>
         </div>
       </footer>}
+      {!online && <div className="offline" role="status">You’re offline. Answers will come back when your connection does.</div>}
       {toast && <div className="toast" role="status">{toast}</div>}
     </Ctx.Provider>
   );

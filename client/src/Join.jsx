@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { api } from './api.js';
 import { go, useApp } from './App.jsx';
 
-const MAKER_COUNTRIES = ['India', 'Vietnam', 'China', 'Bangladesh', 'Cambodia', 'Indonesia', 'Sri Lanka', 'Thailand', 'Other'];
+const MAKER_COUNTRIES = ['India', 'Vietnam', 'China', 'Bangladesh', 'Cambodia', 'Indonesia', 'Sri Lanka', 'Thailand', 'Pakistan', 'Nepal', 'Philippines', 'Laos', 'Japan', 'Other'];
 const EMPTY = { name: '', contact: '', email: '', country: '', city: '', about: '', makes: '', materials: '', processes: '', certifications: '', moq: '', leadTimeDays: '', sells: '', needTitle: '', needDetail: '', needMaterials: '', quantity: '', target: '', needCertifications: '' };
 
 export default function Join({ side }) {

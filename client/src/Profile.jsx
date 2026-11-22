@@ -10,7 +10,7 @@ export default function Profile({ kind, id }) {
   const [error, setError] = useState('');
   useEffect(() => {
     setP(null); setError('');
-    api.get(kind === 'maker' ? `/manufacturers/${id}` : `/brands/${id}`).then(setP).catch(() => setError('This company isn’t on Meridian Loop.'));
+    api.get(kind === 'maker' ? `/manufacturers/${id}` : `/brands/${id}`).then(setP).catch((e) => setError(e.status === 404 ? 'This company isn’t on Meridian Loop.' : e.message));
   }, [kind, id]);
 
   const back = <a className="back" href="#" onClick={(e) => { e.preventDefault(); history.length > 1 ? history.back() : (window.location.hash = '/'); }}>Back</a>;

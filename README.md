@@ -11,7 +11,7 @@ It keeps your brief across the conversation ("only GOTS", "only in India"), answ
 
 Meridian Loop grew out of [Sustainable India](https://srishtipal86.wixsite.com/sustainableindia) (2019), which set out to be "the bridge between the manufacturers and the designers".
 
-The demo holds 17 manufacturers and 8 brands, all fictional. Certification schemes are real; their numbers and dates are not.
+The demo holds 45 manufacturers in 13 Asian countries and 22 brands, all fictional. Certification schemes are real; their numbers and dates are not. Results, the directory and profiles can be shown on a map of where each company is.
 
 ## Run it
 
@@ -44,7 +44,7 @@ Both stream the same events to the page: text, a list of matches, a company card
 4. **Rank.** Companies are ranked by how well their passages match, and whether they meet each stated requirement.
 5. **Answer.** The reply names the best fits and cites the numbered passages.
 
-Code: `server/assistant.js` (the assistant, with Claude and built-in modes), `server/rag.js` (retrieval), `server/engine.js` (ranking), `server/store.js` (companies), `data/seed.js` (demo data), `client/src/Chat.jsx` (the conversation), `client/src/` (the rest of the site). `POST /api/chat` streams a turn; `POST /api/search` is the plain search underneath.
+Code: `server/assistant.js` (the assistant, with Claude and built-in modes), `server/guard.js` (rate limits and input cleaning), `server/geo.js` (map locations), `server/rag.js` (retrieval), `server/engine.js` (ranking), `server/store.js` (companies), `data/seed.js` and `data/seed-more.js` (demo data), `client/src/Chat.jsx` (the conversation), `client/src/` (the rest of the site). `POST /api/chat` streams a turn; `POST /api/search` is the plain search underneath.
 
 ## Demo in two minutes
 
@@ -56,6 +56,18 @@ Code: `server/assistant.js` (the assistant, with Claude and built-in modes), `se
 6. Optional: under **List your company**, add a manufacturer (say, a linen workshop in Hue), then ask the assistant for *linen shirts in Vietnam*.
 
 Click **Reset demo** in the footer of the Directory or Join page to remove companies added during a demo.
+
+## Resilience
+
+- **Inputs are checked.** Requests are capped in size, conversation state sent back by the browser is rebuilt field by field, bad JSON gets a short error, and nothing returns a stack trace.
+- **Limits per visitor.** Chat, search and listing are rate limited, duplicate company names are refused, and the demo caps how many companies can join.
+- **Nothing hangs.** Claude calls time out after 45 seconds and fall back to the built-in assistant; streams send a keep-alive every 15 seconds; the page stops waiting after 60 seconds of silence and offers a retry, and a Stop button ends a reply early.
+- **Waking up is handled.** The page retries quietly while a sleeping free server starts.
+- **Saved data survives.** Joined companies are written atomically; a damaged file is set aside and the site starts clean.
+- **The page degrades gently.** A failed photo leaves its frame, a failed map leaves the list, being offline shows a notice, and if a screen throws there is a "Start fresh" button instead of a blank page.
+- **Health check.** `GET /api/health` reports uptime and counts; Render uses it.
+
+`npm test` runs 20 checks, including malformed requests, hostile state, rate limits and a damaged save file.
 
 ## Hosting
 

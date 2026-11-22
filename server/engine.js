@@ -2,6 +2,7 @@
 // Every profile is split into passages, indexed for hybrid retrieval, and answers cite them.
 import { Index, parseConstraints, describeConstraints } from './rag.js';
 import * as store from './store.js';
+import { locate } from './geo.js';
 
 let index = new Index();
 const placeOf = (x) => (x.city === x.country ? x.city : `${x.city}, ${x.country}`);
@@ -33,7 +34,13 @@ const hasCert = (list, wanted) => list.some((c) => c.toLowerCase().includes(want
 // Rank one side: group passages by company, add up relevance, and check the brief's hard requirements.
 function rank(query, kind, checksFor) {
   const constraints = parseConstraints(query);
-  const { results, expansions } = index.search(query, { kinds: [kind], k: 80 });
+  // Numbers and limits are checked against each profile below; leaving them in the text
+  // would make "under 500 units" favour any profile that happens to say "500".
+  const text = query
+    .replace(/(?:moq|minimum order|min\.? order|lead time|run size|quantity)[^,.;]*/gi, ' ')
+    .replace(/\b(?:within|under|below|less than|fewer than|max(?:imum)?|up to|about|around|roughly)\s*\d[\d,]*\s*(?:units|pieces|pcs|days|weeks)?/gi, ' ')
+    .replace(/\b\d[\d,]*\s*(?:units|pieces|pcs|days|weeks)\b/gi, ' ');
+  const { results, expansions } = index.search(text.trim() || query, { kinds: [kind], k: 80 });
   const byId = new Map();
   for (const r of results) {
     const e = byId.get(r.doc.entityId) || { score: 0, passages: [] };
@@ -90,7 +97,7 @@ export function search(side, query) {
       const b = store.getBrand(r.id);
       const best = r.passages.find((p) => p.need !== undefined);
       const need = b.needs[best ? best.need : 0];
-      return { type: 'brand', id: b.id, name: b.name, place: placeOf(b), summary: b.sells, need, checks: r.checks, meetsAll: r.meetsAll, why: (best || r.passages[0]).text, cite: ref(sources, b.id) };
+      return { type: 'brand', id: b.id, name: b.name, place: placeOf(b), geo: locate(b.city, b.country), summary: b.sells, need, checks: r.checks, meetsAll: r.meetsAll, why: (best || r.passages[0]).text, cite: ref(sources, b.id) };
     });
     return { side, query, understood: understood(constraints), expansions, sources, matches, answer: composeBrands(matches, sources) };
   }
@@ -98,7 +105,7 @@ export function search(side, query) {
   const sources = cite(ranked);
   const matches = ranked.map((r) => {
     const m = store.getManufacturer(r.id);
-    return { type: 'maker', id: m.id, name: m.name, place: placeOf(m), summary: m.makes, moq: m.moq, leadTimeDays: m.leadTimeDays, certifications: m.certifications.map((c) => c.name), checks: r.checks, meetsAll: r.meetsAll, why: r.passages[0].text, cite: ref(sources, m.id) };
+    return { type: 'maker', id: m.id, name: m.name, place: placeOf(m), geo: locate(m.city, m.country), summary: m.makes, moq: m.moq, leadTimeDays: m.leadTimeDays, certifications: m.certifications.map((c) => c.name), checks: r.checks, meetsAll: r.meetsAll, why: r.passages[0].text, cite: ref(sources, m.id) };
   });
   return { side, query, understood: understood(constraints), expansions, sources, matches, answer: composeMakers(matches, sources) };
 }
