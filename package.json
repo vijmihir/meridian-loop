@@ -2,7 +2,7 @@
   "name": "meridian-loop",
   "version": "1.0.0",
   "private": true,
-  "description": "Meridian Loop \u2014 AI-powered sustainable sourcing & commerce platform (demo)",
+  "description": "Meridian Loop — AI-powered sustainable sourcing & commerce platform (demo)",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n api,web -c green,blue \"node --env-file-if-exists=.env --watch server/index.js\" \"vite\"",
@@ -13,14 +13,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.5.0",
-    "express": "^5.1.0",
-    "nodemailer": "10.1.7",
-    "pdfjs-dist": "^6.5.438"
+    "express": "^5.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.2.0",
-    "pdf-lib": "^1.17.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "vite": "^7.1.0"

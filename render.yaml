@@ -15,6 +15,4 @@ services:
         value: "22"
       - key: DEMO_MODE
         value: "1"
-      - key: SESSION_SECRET
-        generateValue: true
-      # Optional: add ANTHROPIC_API_KEY (Claude answers) and SMTP_URL / DEMO_INBOX (real email) in the Render dashboard.
+      # Optional: add ANTHROPIC_API_KEY in the Render dashboard for Claude-written answers.
