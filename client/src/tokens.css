@@ -8,16 +8,19 @@
   --color-error: oklch(52% 0.19 27); --color-success: oklch(50% 0.12 150);
   --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
   --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
-  --color-paper: oklch(97.4% 0.007 95); --color-paper-2: oklch(94.6% 0.012 110); --color-paper-3: oklch(90% 0.018 120); --color-surface: oklch(99.4% 0.003 95);
-  --color-ink: oklch(22% 0.02 160); --color-ink-2: oklch(36% 0.02 160); --color-muted: oklch(49% 0.015 160);
-  --color-rule: oklch(89.5% 0.012 140); --color-rule-ink: oklch(80% 0.016 140);
-  --color-accent: oklch(41% 0.105 160); --color-accent-2: oklch(48% 0.115 160); --color-accent-ink: oklch(98.5% 0.008 160); --color-accent-soft: oklch(94% 0.035 160); --color-focus: oklch(48% 0.13 160);
-  --color-scrim: oklch(14% 0.01 60 / 0.6); --color-scrim-mid: oklch(14% 0.01 60 / 0.42); --color-scrim-low: oklch(14% 0.01 60 / 0.05); --color-scrim-top: oklch(14% 0.01 60 / 0.5); --color-backdrop: oklch(15% 0.02 160 / 0.45);
-  --shadow-float: 0 24px 60px oklch(10% 0.01 60 / 0.35); --shadow-dialog: 0 30px 80px oklch(10% 0.02 160 / 0.35); --color-on-photo: oklch(98.5% 0.005 85); --color-shadow: oklch(22% 0.02 160 / 0.1);
-  --color-sea: oklch(95.6% 0.012 210); --color-land: oklch(91.5% 0.017 120); --color-land-edge: oklch(84% 0.02 120); --color-pin: oklch(62% 0.02 160);
-  --font-display: "Fraunces", ui-serif, Georgia, serif; --font-body: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  /* the landing page's dealt palette (taste-skill: white-mint-tiles) and type (Manrope + JetBrains Mono) */
+  --color-paper: #ffffff; --color-paper-2: #f3f3f3; --color-paper-3: #e6e6e6; --color-surface: #ffffff;
+  --color-ink: #232323; --color-ink-2: #3b3b3b; --color-muted: #686868;
+  --color-rule: #e7e7e7; --color-rule-ink: #cdcdcd;
+  --color-accent: #232323; --color-accent-2: #3d3d3d; --color-accent-ink: #ffffff; --color-accent-soft: #dcffea; --color-focus: #232323;
+  --color-mint: #a1ffcb; --color-ok-ink: #11633d;
+  --color-scrim: oklch(14% 0.01 60 / 0.6); --color-scrim-mid: oklch(14% 0.01 60 / 0.42); --color-scrim-low: oklch(14% 0.01 60 / 0.05); --color-scrim-top: oklch(14% 0.01 60 / 0.5); --color-backdrop: oklch(15% 0 0 / 0.45);
+  --shadow-float: 0 24px 60px oklch(10% 0.01 60 / 0.35); --shadow-dialog: 0 30px 80px oklch(10% 0 0 / 0.3);
+  --color-on-photo: #ffffff; --color-shadow: oklch(20% 0 0 / 0.08);
+  --color-sea: #edf3f0; --color-land: #e2e6df; --color-land-edge: #cfd5cc; --color-pin: #9a9a9a;
+  --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif; --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-outlier: "JetBrains Mono", ui-monospace, monospace;
-  --radius-card: 14px; --radius-control: 10px; --radius-pill: 999px; --rule-hair: 1px; --rule-ink: 1px;
+  --radius-card: 12px; --radius-control: 8px; --radius-pill: 999px; --rule-hair: 1px; --rule-ink: 1px;
   --shadow-card: 0 10px 28px var(--color-shadow);
-  --tracking-display: -0.015em; --display-weight: 400;
+  --tracking-display: -0.035em; --display-weight: 500;
 }

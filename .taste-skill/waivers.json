@@ -1,0 +1,12 @@
+[
+  {
+    "check": "button-styles",
+    "target": "(one screen)",
+    "reason": "The third style is the user's chat bubble inside the drawn app window, not a page button; the page has one primary and one secondary."
+  },
+  {
+    "check": "scroll-reveal",
+    "target": "footer#contact > div.wrap > div.closing__cta.close--type > a.btn.btn--primary",
+    "reason": "The colour change comes from the kit's own action bar logic marking the close button as the bar's twin; no reveal is written on the page."
+  }
+]

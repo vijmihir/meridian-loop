@@ -88,8 +88,9 @@
   }
   @media (max-width: 639px) { .hero--product .hero__stage:has(> .app) { aspect-ratio: auto; flex: 1 1 auto; min-height: 300px; } }
   #how .panel { --p-h: 330px; }
-  #brands .frame { --p-h: 520px; }
-  @media (max-width: 639px) { #how .panel { --p-h: 260px; } #brands .frame { --p-h: 360px; } }
+  #brands .app.ui { grid-template-columns: minmax(0, 1fr); margin-top: var(--s-7); }
+  #makers .frame, #faq .frame { min-height: 320px; }
+  @media (max-width: 639px) { #how .panel { --p-h: 260px; } #makers .frame, #faq .frame { aspect-ratio: 4 / 3; min-height: 0; } }
   .menu-card .panel { --p-h: 200px; }
 </style>
 </head>
@@ -221,7 +222,7 @@
     </div></div>
   </section>
 
-  <section class="section" id="how" aria-labelledby="how-h">
+  <section class="section" id="how" style="--hm: 2" aria-labelledby="how-h">
     <div class="wrap">
       <div class="section-head">
         <h2 id="how-h">Find a manufacturer in 3 steps. <span class="muted">Every answer names the profile lines it used.</span></h2>
@@ -229,7 +230,7 @@
       <div class="grid">
         <article class="card card--row card--open span-4">
           <span class="step-num">1</span>
-          <h3>Describe the garment</h3>
+          <h3>Describe the clothing you need</h3>
           <p>Fibre, run size, certificate and country, in the words you would use with a sourcing agent.</p>
           <div class="panel">
             <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:340px;--ax:max(24px, 50% - 170px);--ay:40px;--ay-sm:16px" data-ui-loop>
@@ -253,7 +254,7 @@
         </article>
         <article class="card card--row card--open span-4">
           <span class="step-num">2</span>
-          <h3>Narrow the shortlist</h3>
+          <h3>Narrow it down with the assistant</h3>
           <p>Add a country or a lead time; the brief keeps what you said before.</p>
           <div class="panel">
             <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:340px;--ax:max(24px, 50% - 170px);--ay:40px;--ay-sm:16px">
@@ -273,7 +274,7 @@
         </article>
         <article class="card card--row card--open span-4">
           <span class="step-num">3</span>
-          <h3>Email the manufacturer</h3>
+          <h3>Contact the manufacturer</h3>
           <p>Each profile names its contact and opens an email with the subject filled in.</p>
           <div class="panel">
             <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:360px;--ax:max(24px, 50% - 180px);--ay:40px;--ay-sm:16px">
@@ -316,7 +317,7 @@
     </div>
   </section>
 
-  <section class="section ground-surface" id="certificates" data-moment="iris-opens" data-moment-opts='{"from": "base"}' aria-labelledby="cert-h">
+  <section class="section ground-surface" id="certificates" style="--hm: 2" data-moment="iris-opens" data-moment-opts='{"from": "base"}' aria-labelledby="cert-h">
     <div class="wrap">
       <div class="section-head">
         <h2 id="cert-h">Certificates with issuer and expiry. <span class="muted">The assistant flags any that run out within four months.</span></h2>
@@ -327,12 +328,16 @@
           <li><span class="rows__name">GRS<small>Recycled content, traced through the chain</small></span><span class="rows__value">14 makers</span></li>
           <li><span class="rows__name">OEKO-TEX Standard 100<small>Finished cloth tested for harmful substances</small></span><span class="rows__value">13 makers</span></li>
           <li><span class="rows__name">WFTO Fair Trade<small>Fair pay and conditions for the weavers</small></span><span class="rows__value">11 makers</span></li>
-        </ul>
-        <ul class="rows span-6 start-7">
           <li><span class="rows__name">bluesign<small>Chemicals managed in production</small></span><span class="rows__value">5 makers</span></li>
           <li><span class="rows__name">WRAP<small>Social compliance audit for factories</small></span><span class="rows__value">4 makers</span></li>
+        </ul>
+        <ul class="rows span-6 start-7">
           <li><span class="rows__name">SA8000<small>Working hours and overtime, audited</small></span><span class="rows__value">3 makers</span></li>
-          <li><span class="rows__name">14 more schemes<small>RCS, OCS, RWS, ZDHC, SMETA and others</small></span><span class="rows__value">17 certificates</span></li>
+          <li><span class="rows__name">ZDHC<small>Limits on chemicals in wastewater</small></span><span class="rows__value">3 makers</span></li>
+          <li><span class="rows__name">RCS<small>Recycled content, without the GRS social rules</small></span><span class="rows__value">2 makers</span></li>
+          <li><span class="rows__name">OCS<small>Organic content in the finished product</small></span><span class="rows__value">2 makers</span></li>
+          <li><span class="rows__name">Fair Trade USA<small>A premium paid to garment workers</small></span><span class="rows__value">2 makers</span></li>
+          <li><span class="rows__name">9 more schemes<small>FSC, RWS, SMETA, Higg FEM and others</small></span><span class="rows__value">10 certificates</span></li>
         </ul>
       </div>
       <p class="t-small">Certificates are listed as each company gives them. Check the certificate number with the issuer before you place an order.</p>
@@ -342,25 +347,33 @@
   <section class="section ground-surface" id="brands" aria-labelledby="brands-h">
     <div class="wrap">
       <div class="grid">
-        <div class="span-5 stack-6">
-          <div class="section-head">
-            <h2 id="brands-h">22 brands with open requests</h2>
-            <p>For manufacturers: say what you make, and the assistant lists the brands asking for it, with quantities and target prices.</p>
-          </div>
-          <div class="btn-row"><a class="btn btn--secondary" href="/app.html?role=maker">Find brands for your factory</a></div>
+        <div class="span-5"><h2 id="brands-h">22 brands with open requests</h2></div>
+        <div class="span-6 start-7 stack-4">
+          <p>For manufacturers: say what you make, and the assistant lists the brands asking for it, with quantities and target prices.</p>
+          <p><a class="link" href="/app.html?role=maker">Find brands for your factory</a></p>
         </div>
-        <div class="frame span-7 start-6" style="background: none; border: 0">
-          <div class="stage stage--fade-b"><div class="fit" style="--fit-max:720px;--ax:0px;--ay:0px">
-            <div class="ui ui-panel ui-win" data-ui="window" data-open="New" data-work="Matching" data-done="Matched">
-              <div class="ui-win__bar">
-                <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-                <span class="ui-win__crumb">Brands <i>/</i> <b>Open requests</b></span>
-                <span class="ui-spacer"></span>
-              </div>
-              <div class="ui-win__body">
-                <div class="ui-win__main">
-                  <div class="ui-win__cols" aria-hidden="true"><span>Brand</span><span>Looking for</span><span>Status</span><span>Units</span></div>
-                  <ul class="ui-win__rows">
+      </div>
+      <div class="ui app app--one fill" role="img" aria-label="Open requests from brands, newest first, with the number of units each wants" data-ui-pause-host>
+        <div class="app__pane" data-ui-loop>
+          <div class="ui ui-panel ui-win" data-ui="window" data-open="New" data-work="Matching" data-done="Matched">
+            <div class="ui-win__bar">
+              <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ui-win__crumb">Brands <i>/</i> <b>Open requests</b></span>
+              <span class="ui-spacer"></span>
+              <span class="ui-win__search" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg><span class="ui-win__ph">Filter</span><span class="ui-kbd">/</span></span>
+            </div>
+            <div class="ui-win__body">
+              <nav class="ui-win__side" aria-hidden="true">
+                <span class="ui-win__nav is-on"><svg class="ui-icon" viewBox="0 0 16 16"><path d="M2.5 9h3l1 1.5h3l1-1.5h3"/><path d="M2.5 9 4 3.5h8L13.5 9v3.5h-11z"/></svg>Open<em>24</em></span>
+                <span class="ui-win__nav"><svg class="ui-icon" viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg>Matched<em>7</em></span>
+                <span class="ui-win__label">Products</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>Basics</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>Activewear</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>Denim</span>
+              </nav>
+              <div class="ui-win__main">
+                <div class="ui-win__cols" aria-hidden="true"><span>Brand</span><span>Looking for</span><span>Status</span><span>Units</span></div>
+                <ul class="ui-win__rows">
                     <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="1">CG</span><span class="ui-win__who">Common Ground Basics</span><span class="ui-win__sub">Organic cotton crew tees</span><span class="ui-win__st" data-st>New</span><span class="ui-win__age">5,000</span></li>
                     <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="3">KE</span><span class="ui-win__who">Kinetic Earth</span><span class="ui-win__sub">Recycled running tee and shorts</span><span class="ui-win__st" data-st>New</span><span class="ui-win__age">3,000</span></li>
                     <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="4">IR</span><span class="ui-win__who">Indigo Roots</span><span class="ui-win__sub">Hemp and organic cotton jeans</span><span class="ui-win__st is-done" data-st>Matched</span><span class="ui-win__age">2,500</span></li>
@@ -371,10 +384,9 @@
                     <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="4">NL</span><span class="ui-win__who">Northloom</span><span class="ui-win__sub">Recycled wool sweaters</span><span class="ui-win__st is-done" data-st>Matched</span><span class="ui-win__age">600</span></li>
                     <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="2">AO</span><span class="ui-win__who">Atelier Ondo</span><span class="ui-win__sub">Linen midi dresses</span><span class="ui-win__st is-done" data-st>Matched</span><span class="ui-win__age">300</span></li>
                   </ul>
-                </div>
               </div>
             </div>
-          </div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -382,16 +394,19 @@
 
   <section class="section" id="faq" aria-labelledby="faq-h">
     <div class="wrap">
-      <div class="section-head">
-        <h2 id="faq-h">Questions from brands and manufacturers</h2>
-      </div>
-      <div class="faq">
-        <div class="faq__item"><h3>What does it cost?</h3><p>Nothing in this demo. There is no account to make and no fee to list a company.</p></div>
-        <div class="faq__item"><h3>Where do the answers come from?</h3><p>Only from company profiles on Meridian Loop. Every company and person in this demo is fictional; the certification schemes are real.</p></div>
-        <div class="faq__item"><h3>How are matches ranked?</h3><p>By how closely a profile fits your words, then by how many of your requirements it meets: country, certificate, run size and lead time.</p></div>
-        <div class="faq__item"><h3>What if nobody fits?</h3><p>It says so, shows the closest manufacturers and names the requirement each one misses.</p></div>
-        <div class="faq__item"><h3>Does it use AI?</h3><p>It runs on Claude when an API key is set, and on a built-in assistant without one. Both answer only from the profiles.</p></div>
-        <div class="faq__item"><h3>Where did Meridian Loop start?</h3><p>With <a class="link" href="https://srishtipal86.wixsite.com/sustainableindia" rel="noopener">Sustainable India</a>, which set out in 2019 to be the bridge between manufacturers and designers.</p></div>
+      <div class="grid">
+        <div class="span-6 stack-6">
+          <div class="section-head"><h2 id="faq-h">Questions about the assistant</h2></div>
+          <div class="faq">
+            <div class="faq__item"><h3>What does the assistant cost?</h3><p>Nothing at this stage. There is no account to make and no fee to list a company.</p></div>
+            <div class="faq__item"><h3>Where does the assistant get its answers?</h3><p>Only from company profiles on Meridian Loop: materials, run sizes, lead times and certificates, each cited.</p></div>
+            <div class="faq__item"><h3>What does the assistant do when no manufacturer fits?</h3><p>It says so, shows the closest manufacturers and names the requirement each one misses.</p></div>
+            <div class="faq__item"><h3>Where did Meridian Loop start?</h3><p>With <a class="link" href="https://srishtipal86.wixsite.com/sustainableindia" rel="noopener">Sustainable India</a>, which set out in 2019 to be the bridge between manufacturers and designers.</p></div>
+          </div>
+        </div>
+        <div class="frame frame--photo frame--split span-6 start-7">
+          <img class="frame__img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Hands_and_threads.jpg/1280px-Hands_and_threads.jpg" alt="A weaver's hands drawing red threads across the fingers at a loom" data-source="library" data-subject="hand weaving" style="object-position: 60% 50%">
+        </div>
       </div>
     </div>
   </section>
@@ -412,7 +427,7 @@
           <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>Meridian Loop</a>
           <p class="footer__lede">Matches sustainable clothing brands with manufacturers across Asia. Built in Hong Kong for the HKSTP Ideation Programme 2026.</p>
         </div>
-        <div class="span-2 start-7 footer__col"><h3>Tools</h3><ul><li><a href="/app.html">Assistant</a></li><li><a href="/app.html#/directory">Directory</a></li><li><a href="/app.html#/join">List your company</a></li></ul></div>
+        <div class="span-2 start-7 footer__col"><h3>Tools</h3><ul><li><a href="/app.html#/">Assistant</a></li><li><a href="/app.html#/directory">Directory</a></li><li><a href="/app.html#/join">List your company</a></li></ul></div>
         <div class="span-2 footer__col"><h3>This page</h3><ul><li><a href="#how">Steps</a></li><li><a href="#makers">Makers</a></li><li><a href="#brands">Brands</a></li><li><a href="#faq">Questions</a></li></ul></div>
         <div class="span-2 footer__col"><h3>About</h3><ul><li><a href="https://srishtipal86.wixsite.com/sustainableindia" rel="noopener">Sustainable India</a></li><li><a href="mailto:hello@meridianloop.example">Email us</a></li></ul></div>
       </div>
@@ -424,6 +439,10 @@
     </div>
   </div>
 </footer>
+
+<nav class="actionbar" aria-label="Quick actions">
+  <a class="btn btn--primary" href="/app.html">Ask the assistant</a>
+</nav>
 
 <script type="module" src="/kit/system.js"></script>
 <script type="module" src="/kit/motion/motion.js"></script>

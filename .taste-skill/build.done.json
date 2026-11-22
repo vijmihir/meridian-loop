@@ -6,6 +6,6 @@
  "category": "AI sourcing assistant for sustainable clothing",
  "primary": "Ask the assistant",
  "rounds": 3,
- "start": "2026-11-22T09:58:41.671Z",
+ "start": "2026-11-22T13:30:01.654Z",
  "by": "gate.mjs --start"
 }

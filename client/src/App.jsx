@@ -47,7 +47,7 @@ export default function App() {
     <Ctx.Provider value={{ meta, notify, refreshMeta: () => api.get('/meta').then(setMeta) }}>
       <header className="header">
         <div className="bar">
-          <a className="brand" href="/" aria-label="Meridian Loop home">Meridian Loop</a>
+          <a className="brand" href="/" aria-label="Meridian Loop home"><span className="mark-dots" aria-hidden="true" />Meridian Loop</a>
           <nav className="nav" aria-label="Main">
             <a href="#/" aria-current={here('chat')}>Assistant</a>
             <a href="#/directory" aria-current={here('directory')}>Directory</a>
